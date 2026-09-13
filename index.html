@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>VR Studio Sandbox | Artifact 35</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+  <meta name="description" content="10x10x10 Spatial VR Studio Sandbox for Meta Quest 2. Features live dynamic wall canvas, model inserter table, and push-to-talk AI command interface.">
+
+  <!-- A-Frame Core (local vendor with CDN fallback) -->
+  <script src="./vendor/aframe.min.js"></script>
+  <script src="./vendor/aframe-extras.min.js"></script>
+  <script>
+    if (typeof AFRAME === 'undefined') {
+      document.write('<script src="https://aframe.io/releases/1.6.0/aframe.min.js"><\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.0/dist/aframe-extras.min.js"><\/script>');
+    }
+  </script>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070913;
+      --cyan: #00f5d4;
+      --cyan-glow: rgba(0, 245, 212, 0.45);
+      --amber: #f59e0b;
+      --gold: #fbbf24;
+      --panel-bg: rgba(9, 13, 24, 0.92);
+      --border-cyan: rgba(0, 245, 212, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg-dark);
+      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Top Overlay Navigation Header for Desktop / 2D Browser */
+    .top-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 54px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(7, 9, 19, 0.96) 0%, rgba(7, 9, 19, 0.6) 80%, transparent 100%);
+      border-bottom: 1px solid rgba(0, 245, 212, 0.2);
+      z-index: 999;
+      pointer-events: auto;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: rgba(0, 245, 212, 0.10);
+      border: 1px solid var(--border-cyan);
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(0, 245, 212, 0.22);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .header-title {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title span {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 8px;
+      background: rgba(0, 245, 212, 0.15);
+      border: 1px solid var(--border-cyan);
+      border-radius: 12px;
+      color: var(--cyan);
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .telemetry-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(4, 7, 14, 0.85);
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 245, 212, 0.25);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseLive 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Desktop Controls Guide Overlay */
+    .controls-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(7, 11, 22, 0.88);
+      border: 1px solid rgba(0, 245, 212, 0.25);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #cbd5e1;
+      z-index: 999;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .controls-overlay strong {
+      color: var(--cyan);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12.5px;
+    }
+
+    .controls-overlay kbd {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-header">
+    <div class="header-left">
+      <a href="../#artifacts" class="btn-back">
+        <span>←</span> Horizon Sanctuary
+      </a>
+      <div class="header-title">
+        VR STUDIO SANDBOX <span>ARTIFACT 35</span>
+      </div>
+    </div>
+    <div class="telemetry-pill">
+      <span class="dot-live"></span>
+      <span id="header-status">Studio Live • 10×10×10 Room</span>
+    </div>
+  </header>
+
+  <!-- 2D Desktop Controls Overlay -->
+  <div class="controls-overlay" id="desktop-controls">
+    <strong>🎮 Controls Scheme</strong>
+    • <b>Quest 2 VR</b>: Left Stick = Move with slide | Right Stick = Astra Head Pivot Turn | Triggers = Click in-VR terminal.<br>
+    • <b>Desktop</b>: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> = Walk | Click & Drag = Look | Click buttons to interact.
+  </div>
+
+  <!-- Master A-Frame WebXR Scene -->
+  <a-scene
+    renderer="antialias: true; colorManagement: true; foveationLevel: 1; sortObjects: true"
+    vr-mode-ui="enabled: true"
+    webxr="optionalFeatures: hit-test, local-floor"
+    background="color: #030712">
+
+    <!-- Asset Preloader -->
+    <a-assets timeout="10000">
+      <img id="img-canvas-default" src="./textures/studio_canvas_default.jpg" crossorigin="anonymous">
+      <img id="img-canvas-dawn" src="./textures/canvas_cosmic_dawn.jpg" crossorigin="anonymous">
+      <img id="img-canvas-hearth" src="./textures/canvas_living_hearth.jpg" crossorigin="anonymous">
+      <img id="img-canvas-haven" src="./textures/canvas_haven_manor.jpg" crossorigin="anonymous">
+      <img id="img-canvas-odyssey" src="./textures/canvas_odyssey_panorama.jpg" crossorigin="anonymous">
+      <img id="img-canvas-blender" src="./textures/canvas_blender_forge.jpg" crossorigin="anonymous">
+      
+      <!-- Preloaded 3D Models for Inserter -->
+      <a-asset-item id="model-monolith" src="./models/blender_nexus_monolith.glb"></a-asset-item>
+      <a-asset-item id="model-hoverbot" src="./models/glimmer_hoverbot.glb"></a-asset-item>
+      <a-asset-item id="model-plant" src="./models/conservatory_plant_pbr.glb"></a-asset-item>
+      <a-asset-item id="model-tesla" src="./models/tesla_optimus_pbr.glb"></a-asset-item>
+      <a-asset-item id="model-robot" src="./models/antigravity_robot.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- ============================================================= -->
+    <!-- PLAYER RIG: Quest 2 Head-Centric Pivot & Substep Locomotion   -->
+    <!-- ============================================================= -->
+    <a-entity id="player-rig" position="0 0 2.8" rotation="0 0 0">
+      <!-- Head Camera -->
+      <a-camera
+        id="head-camera"
+        position="0 1.65 0"
+        look-controls="pointerLockEnabled: false"
+        wasd-controls="enabled: false">
+        <a-cursor
+          id="camera-cursor"
+          position="0 0 -1"
+          geometry="primitive: ring; radiusInner: 0.007; radiusOuter: 0.012"
+          material="color: #00f5d4; shader: flat; opacity: 0.75"
+          raycaster="objects: .clickable; far: 4">
+        </a-cursor>
+      </a-camera>
+
+      <!-- Left Quest Controller (Astra Sub-stepped Locomotion) -->
+      <a-entity
+        id="left-controller"
+        oculus-touch-controls="hand: left"
+        quest-smooth-locomotion="speed: 2.0; deadzone: 0.14"
+        laser-controls="hand: left"
+        raycaster="objects: .clickable; far: 5; showLine: true; lineColor: #00f5d4; lineOpacity: 0.5">
+      </a-entity>
+
+      <!-- Right Quest Controller (Astra Head-Centric Smooth Turn) -->
+      <a-entity
+        id="right-controller"
+        oculus-touch-controls="hand: right"
+        quest-smooth-turn="turnSpeed: 58.0; deadzone: 0.14"
+        laser-controls="hand: right"
+        raycaster="objects: .clickable; far: 5; showLine: true; lineColor: #38bdf8; lineOpacity: 0.6">
+      </a-entity>
+    </a-entity>
+
+    <!-- Desktop Keyboard Navigation Component -->
+    <a-entity desktop-keyboard-nav="speed: 2.4"></a-entity>
+
+    <!-- ============================================================= -->
+    <!-- LIGHTING ENVIRONMENT: Architectural Studio Atmosphere         -->
+    <!-- ============================================================= -->
+    <!-- Soft Ambient Room Fill -->
+    <a-entity light="type: ambient; color: #1e293b; intensity: 0.85"></a-entity>
+
+    <!-- Central Skylight / Downlight -->
+    <a-entity light="type: point; color: #f8fafc; intensity: 0.9; distance: 15; decay: 2" position="0 5.2 0"></a-entity>
+
+    <!-- Focused Gallery Spotlight on Wall Canvas -->
+    <a-entity light="type: spot; color: #fffbeb; intensity: 1.4; angle: 48; penumbra: 0.4; distance: 9" position="0 4.8 -2.2" rotation="-40 0 0"></a-entity>
+
+    <!-- Focused Pedestal Spotlight on Model Inserter Table -->
+    <a-entity light="type: spot; color: #38bdf8; intensity: 1.6; angle: 32; penumbra: 0.3; distance: 7" position="0 4.6 -1.8" rotation="-90 0 0"></a-entity>
+
+    <!-- Architectural Corner Accent Lights -->
+    <a-entity light="type: point; color: #00f5d4; intensity: 0.4; distance: 6" position="-4.5 2.5 -4.5"></a-entity>
+    <a-entity light="type: point; color: #f59e0b; intensity: 0.4; distance: 6" position="4.5 2.5 -4.5"></a-entity>
+    <a-entity light="type: point; color: #3b82f6; intensity: 0.3; distance: 6" position="-4.5 2.5 4.5"></a-entity>
+    <a-entity light="type: point; color: #10b981; intensity: 0.3; distance: 6" position="4.5 2.5 4.5"></a-entity>
+
+    <!-- ============================================================= -->
+    <!-- 10x10x10 ARCHITECTURAL STUDIO CUBE ROOM                       -->
+    <!-- ============================================================= -->
+    <a-entity id="studio-room">
+      <!-- 1. Polished Studio Floor (10m x 10m at Y=0) -->
+      <a-plane
+        id="room-floor"
+        position="0 0 0"
+        rotation="-90 0 0"
+        width="10"
+        height="10"
+        material="color: #0f172a; roughness: 0.25; metalness: 0.15">
+      </a-plane>
+      
+      <!-- Perimeter Brass Floor Trim -->
+      <a-box position="0 0.02 -4.95" width="10" height="0.04" depth="0.1" material="color: #b45309; metalness: 0.6; roughness: 0.3"></a-box>
+      <a-box position="0 0.02 4.95" width="10" height="0.04" depth="0.1" material="color: #b45309; metalness: 0.6; roughness: 0.3"></a-box>
+      <a-box position="-4.95 0.02 0" width="0.1" height="0.04" depth="10" material="color: #b45309; metalness: 0.6; roughness: 0.3"></a-box>
+      <a-box position="4.95 0.02 0" width="0.1" height="0.04" depth="10" material="color: #b45309; metalness: 0.6; roughness: 0.3"></a-box>
+
+      <!-- 2. Studio Ceiling (10m x 10m at Y=6.0m) -->
+      <a-plane
+        id="room-ceiling"
+        position="0 6.0 0"
+        rotation="90 0 0"
+        width="10"
+        height="10"
+        material="color: #0b0f19; roughness: 0.9; metalness: 0.1">
+      </a-plane>
+
+      <!-- Ceiling Architectural Beams -->
+      <a-box position="0 5.9 -2.5" width="10" height="0.2" depth="0.3" material="color: #1e293b; roughness: 0.7"></a-box>
+      <a-box position="0 5.9 0" width="10" height="0.2" depth="0.3" material="color: #1e293b; roughness: 0.7"></a-box>
+      <a-box position="0 5.9 2.5" width="10" height="0.2" depth="0.3" material="color: #1e293b; roughness: 0.7"></a-box>
+
+      <!-- 3. North Gallery Wall (Z = -5.0m) -->
+      <a-plane
+        id="wall-north"
+        position="0 3.0 -5.0"
+        rotation="0 0 0"
+        width="10"
+        height="6"
+        material="color: #111827; roughness: 0.85; metalness: 0.05">
+      </a-plane>
+
+      <!-- 4. South Wall (Z = 5.0m) -->
+      <a-plane
+        id="wall-south"
+        position="0 3.0 5.0"
+        rotation="0 180 0"
+        width="10"
+        height="6"
+        material="color: #111827; roughness: 0.85; metalness: 0.05">
+      </a-plane>
+
+      <!-- 5. West Wall (X = -5.0m) -->
+      <a-plane
+        id="wall-west"
+        position="-5.0 3.0 0"
+        rotation="0 90 0"
+        width="10"
+        height="6"
+        material="color: #0d1322; roughness: 0.85; metalness: 0.05">
+      </a-plane>
+
+      <!-- 6. East Wall (X = 5.0m) -->
+      <a-plane
+        id="wall-east"
+        position="5.0 3.0 0"
+        rotation="0 -90 0"
+        width="10"
+        height="6"
+        material="color: #0d1322; roughness: 0.85; metalness: 0.05">
+      </a-plane>
+    </a-entity>
+
+    <!-- ============================================================= -->
+    <!-- THE WALL CANVAS (North Wall: X=0, Y=2.5, Z=-4.92)              -->
+    <!-- ============================================================= -->
+    <a-entity id="gallery-canvas-assembly" position="0 2.55 -4.92">
+      <!-- Dark Walnut Outer Bevel Frame -->
+      <a-box
+        id="canvas-frame"
+        position="0 0 -0.04"
+        width="4.4"
+        height="2.8"
+        depth="0.08"
+        material="color: #1c140d; roughness: 0.5; metalness: 0.2">
+      </a-box>
+
+      <!-- Brushed Brass Inner Lip Frame -->
+      <a-box
+        position="0 0 -0.01"
+        width="4.26"
+        height="2.66"
+        depth="0.04"
+        material="color: #d97706; roughness: 0.35; metalness: 0.7">
+      </a-box>
+
+      <!-- Dynamic Live Wall Canvas Plane (Receives AI Images in Real Time!) -->
+      <a-plane
+        id="studio-wall-canvas"
+        class="clickable"
+        position="0 0 0.015"
+        width="4.2"
+        height="2.6"
+        material="src: #img-canvas-default; shader: standard; roughness: 0.25; metalness: 0.05">
+      </a-plane>
+
+      <!-- Curated Artwork Brass Plaque Underneath -->
+      <a-entity id="canvas-plaque" position="0 -1.58 0.02">
+        <a-plane width="2.4" height="0.22" material="color: #0f172a; roughness: 0.4; metalness: 0.6"></a-plane>
+        <a-text
+          id="canvas-plaque-title"
+          value="Cosmic Dawn Sanctuary • Canvas Live"
+          align="center"
+          position="0 0 0.01"
+          width="3.2"
+          color="#fbbf24"
+          font="kelsonsans">
+        </a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ============================================================= -->
+    <!-- THE MODEL INSERTER TABLE & PEDESTAL (Center: X=0, Z=-1.8)     -->
+    <!-- ============================================================= -->
+    <a-entity id="workbench-assembly" position="0 0 -1.8">
+      <!-- Minimalist Dark Timber Tabletop (2.2m x 1.2m at Y=0.85m) -->
+      <a-box
+        id="tabletop"
+        position="0 0.82 0"
+        width="2.2"
+        height="0.08"
+        depth="1.2"
+        material="color: #1e1b18; roughness: 0.4; metalness: 0.15">
+      </a-box>
+
+      <!-- Brass Edge Inlay Bands -->
+      <a-box position="0 0.825 0.59" width="2.2" height="0.07" depth="0.02" material="color: #d97706; metalness: 0.7; roughness: 0.3"></a-box>
+      <a-box position="0 0.825 -0.59" width="2.2" height="0.07" depth="0.02" material="color: #d97706; metalness: 0.7; roughness: 0.3"></a-box>
+
+      <!-- 4 Architectural Tapered Steel Legs -->
+      <a-cylinder position="-0.95 0.4 -0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-cylinder position="0.95 0.4 -0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-cylinder position="-0.95 0.4 0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-cylinder position="0.95 0.4 0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+
+      <!-- Raised Model Inserter Dais (Pedestal on Table) -->
+      <a-cylinder
+        id="pedestal-dais"
+        class="clickable"
+        position="0 0.89 0"
+        radius="0.44"
+        height="0.06"
+        material="color: #090d16; metalness: 0.6; roughness: 0.2">
+      </a-cylinder>
+
+      <!-- Luminous Cyan Tech Ring / Rune Ring around Dais -->
+      <a-ring
+        position="0 0.925 0"
+        rotation="-90 0 0"
+        radius-inner="0.38"
+        radius-outer="0.42"
+        material="color: #00f5d4; shader: flat; opacity: 0.85"
+        animation="property: material.opacity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 1800">
+      </a-ring>
+
+      <!-- Plaque on Front Edge of Table -->
+      <a-entity position="0 0.82 0.61">
+        <a-plane width="0.9" height="0.06" material="color: #0f172a; metalness: 0.5"></a-plane>
+        <a-text
+          id="pedestal-label"
+          value="MODEL INSERTER • NEXUS MONOLITH"
+          align="center"
+          position="0 0 0.01"
+          width="1.3"
+          color="#00f5d4"
+          font="kelsonsans">
+        </a-text>
+      </a-entity>
+
+      <!-- ========================================================= -->
+      <!-- DYNAMIC 3D MODEL SLOT (Loads .glb Models On-the-Fly!)      -->
+      <!-- ========================================================= -->
+      <a-entity
+        id="model-inserter-slot"
+        position="0 0.95 0"
+        rotation="0 0 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 28000; easing: linear">
+        <!-- Initial Default Model: Nexus Monolith -->
+        <a-entity
+          id="active-model-entity"
+          gltf-model="#model-monolith"
+          scale="1.2 1.2 1.2"
+          position="0 0 0">
+        </a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- ============================================================= -->
+    <!-- IN-VR CHAT TERMINAL STAND (Physical Ergonomic Glass Pedestal)  -->
+    <!-- Angled comfortably beside the table for Quest 2 touch/raycast -->
+    <!-- ============================================================= -->
+    <a-entity id="vr-terminal-rig" position="-1.55 0 -1.35" rotation="0 42 0">
+      <!-- Sleek Minimalist Terminal Stand Column -->
+      <a-cylinder position="0 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.7; roughness: 0.3"></a-cylinder>
+      <a-cylinder position="0 0.02 0" radius="0.22" height="0.04" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+
+      <!-- Holographic Glass Main Panel Header -->
+      <a-entity position="0 1.28 0" rotation="-16 0 0">
+        <!-- Background Glass Slab -->
+        <a-plane
+          width="1.18"
+          height="0.82"
+          material="color: #050811; opacity: 0.92; transparent: true; roughness: 0.2; metalness: 0.3"
+          class="clickable">
+        </a-plane>
+
+        <!-- Cyan Frame Border -->
+        <a-ring
+          position="0 0 0.002"
+          radius-inner="0.58"
+          radius-outer="0.59"
+          material="color: #00f5d4; shader: flat; opacity: 0.4">
+        </a-ring>
+
+        <!-- Header Title -->
+        <a-text
+          value="HORIZON VR STUDIO • ANTIGRAVITY"
+          align="center"
+          position="0 0.35 0.01"
+          width="1.4"
+          color="#00f5d4"
+          font="kelsonsans">
+        </a-text>
+
+        <!-- Status Pill -->
+        <a-plane position="0 0.28 0.01" width="0.7" height="0.05" material="color: #032e2b; opacity: 0.9"></a-plane>
+        <a-text
+          id="hud-status-text"
+          value="🟢 ONLINE • READY FOR COMMANDS"
+          align="center"
+          position="0 0.28 0.015"
+          width="0.95"
+          color="#34d399"
+          font="kelsonsans">
+        </a-text>
+
+        <!-- Dialogue Box: Christopher's Input & Antigravity's Reply -->
+        <a-plane position="0 0.12 0.01" width="1.08" height="0.22" material="color: #0b1120; opacity: 0.85"></a-plane>
+        <a-text
+          id="hud-user-query"
+          value="Christopher: Welcome to the studio sandbox."
+          position="-0.51 0.18 0.015"
+          width="1.02"
+          wrap-count="38"
+          color="#e2e8f0"
+          font="kelsonsans">
+        </a-text>
+        <a-text
+          id="hud-ai-reply"
+          value="Antigravity: Standing by. Push the button to speak, or tap a chip below to update the canvas or insert 3D models."
+          position="-0.51 0.09 0.015"
+          width="1.02"
+          wrap-count="40"
+          color="#38bdf8"
+          font="kelsonsans">
+        </a-text>
+
+        <!-- ========================================================= -->
+        <!-- PUSH-TO-TALK MIC BUTTON (Single-click / Click-to-End)     -->
+        <!-- ========================================================= -->
+        <a-entity id="hud-mic-button-group" position="0 -0.06 0.02">
+          <a-plane
+            id="hud-mic-btn"
+            class="clickable"
+            width="0.92"
+            height="0.10"
+            material="color: #0284c7; roughness: 0.3; metalness: 0.2">
+          </a-plane>
+          <a-text
+            id="hud-mic-label"
+            value="🎙️ PUSH TO SPEAK (CLICK ONCE)"
+            align="center"
+            position="0 0 0.01"
+            width="1.2"
+            color="#ffffff"
+            font="kelsonsans">
+          </a-text>
+        </a-entity>
+
+        <!-- ========================================================= -->
+        <!-- QUICK PROMPT CHIPS (Row 1: Canvas Art | Row 2: 3D Models)  -->
+        <!-- ========================================================= -->
+        <!-- Row 1: Instant Dynamic Canvas Paintings -->
+        <a-entity position="0 -0.17 0.02">
+          <!-- Chip 1: Cosmic Dawn -->
+          <a-entity id="chip-art-dawn" class="clickable" position="-0.38 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #1e1b4b; roughness: 0.4"></a-plane>
+            <a-text value="🎨 Cosmic Dawn" align="center" position="0 0 0.01" width="0.8" color="#c084fc" font="kelsonsans"></a-text>
+          </a-entity>
+
+          <!-- Chip 2: Living Hearth -->
+          <a-entity id="chip-art-hearth" class="clickable" position="0 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #3b1704; roughness: 0.4"></a-plane>
+            <a-text value="🔥 Living Hearth" align="center" position="0 0 0.01" width="0.8" color="#fbbf24" font="kelsonsans"></a-text>
+          </a-entity>
+
+          <!-- Chip 3: Odyssey -->
+          <a-entity id="chip-art-odyssey" class="clickable" position="0.38 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #064e3b; roughness: 0.4"></a-plane>
+            <a-text value="🌌 The Odyssey" align="center" position="0 0 0.01" width="0.8" color="#34d399" font="kelsonsans"></a-text>
+          </a-entity>
+        </a-entity>
+
+        <!-- Row 2: Instant 3D Model Inserter Swaps -->
+        <a-entity position="0 -0.26 0.02">
+          <!-- Chip 4: Robot Companion -->
+          <a-entity id="chip-mod-robot" class="clickable" position="-0.38 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #032e2b; roughness: 0.4"></a-plane>
+            <a-text value="🤖 Robot Model" align="center" position="0 0 0.01" width="0.8" color="#00f5d4" font="kelsonsans"></a-text>
+          </a-entity>
+
+          <!-- Chip 5: Hoverbot / Plant -->
+          <a-entity id="chip-mod-bot" class="clickable" position="0 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #1e293b; roughness: 0.4"></a-plane>
+            <a-text value="🛸 Hoverbot" align="center" position="0 0 0.01" width="0.8" color="#38bdf8" font="kelsonsans"></a-text>
+          </a-entity>
+
+          <!-- Chip 6: Tesla Optimus -->
+          <a-entity id="chip-mod-tesla" class="clickable" position="0.38 0 0">
+            <a-plane width="0.34" height="0.07" material="color: #312e81; roughness: 0.4"></a-plane>
+            <a-text value="⚡ Tesla Optimus" align="center" position="0 0 0.01" width="0.8" color="#818cf8" font="kelsonsans"></a-text>
+          </a-entity>
+        </a-entity>
+
+        <!-- Row 3: Utility & Reset -->
+        <a-entity position="0 -0.34 0.02">
+          <a-entity id="chip-art-blender" class="clickable" position="-0.26 0 0">
+            <a-plane width="0.48" height="0.055" material="color: #1f2937; roughness: 0.4"></a-plane>
+            <a-text value="🎨 Blender 3D Forge Art" align="center" position="0 0 0.01" width="0.75" color="#93c5fd" font="kelsonsans"></a-text>
+          </a-entity>
+
+          <a-entity id="chip-clear-pedestal" class="clickable" position="0.26 0 0">
+            <a-plane width="0.48" height="0.055" material="color: #450a0a; roughness: 0.4"></a-plane>
+            <a-text value="🧹 Clear Table Pedestal" align="center" position="0 0 0.01" width="0.75" color="#f87171" font="kelsonsans"></a-text>
+          </a-entity>
+        </a-entity>
+
+      </a-entity>
+    </a-entity>
+
+  </a-scene>
+
+  <!-- ============================================================= -->
+  <!-- APPLICATION RUNTIME LOGIC: Locomotion, Live Canvas & Inserter -->
+  <!-- ============================================================= -->
+  <script>
+    // -------------------------------------------------------------
+    // Locomotion Helper: Non-linear cubic deadband response curve
+    // -------------------------------------------------------------
+    function axisCurve(raw, deadzone) {
+      if (Math.abs(raw) < deadzone) return 0;
+      const sign = Math.sign(raw);
+      const scaled = (Math.abs(raw) - deadzone) / (1 - deadzone);
+      return sign * Math.pow(scaled, 1.8);
+    }
+
+    // Room Collision Boundary: 10m x 10m room (-4.6m to +4.6m)
+    // Avoid walking through the center table (X: -1.2 to 1.2, Z: -2.5 to -1.1)
+    function checkWallCollision(x, z) {
+      // Room perimeter
+      if (x < -4.6 || x > 4.6 || z < -4.6 || z > 4.6) return true;
+      // Table hitbox
+      if (x > -1.2 && x < 1.2 && z > -2.5 && z < -1.1) return true;
+      return false;
+    }
+
+    function moveWithSlide(currentPos, dx, dz) {
+      let targetX = currentPos.x + dx;
+      let targetZ = currentPos.z + dz;
+
+      // Full move
+      if (!checkWallCollision(targetX, targetZ)) {
+        return { x: targetX, z: targetZ };
+      }
+      // Slide along X
+      if (!checkWallCollision(targetX, currentPos.z)) {
+        return { x: targetX, z: currentPos.z };
+      }
+      // Slide along Z
+      if (!checkWallCollision(currentPos.x, targetZ)) {
+        return { x: currentPos.x, z: targetZ };
+      }
+      // Blocked
+      return { x: currentPos.x, z: currentPos.z };
+    }
+
+    // -------------------------------------------------------------
+    // Quest 2 Smooth Locomotion Component (Left Controller)
+    // -------------------------------------------------------------
+    AFRAME.registerComponent('quest-smooth-locomotion', {
+      schema: {
+        speed: { type: 'number', default: 2.0 },
+        deadzone: { type: 'number', default: 0.14 }
+      },
+      init: function() {
+        this.axisX = 0;
+        this.axisY = 0;
+        this.rigEl = this.el.sceneEl.querySelector('#player-rig');
+        this.cameraEl = this.el.sceneEl.querySelector('#head-camera');
+
+        this.el.addEventListener('axismove', (evt) => {
+          const axes = evt.detail.axis;
+          if (axes && axes.length >= 2) {
+            let rawX = axes.length > 2 ? axes[2] : axes[0];
+            let rawY = axes.length > 3 ? axes[3] : axes[1];
+            this.axisX = axisCurve(rawX, this.data.deadzone);
+            this.axisY = axisCurve(rawY, this.data.deadzone);
+          }
+        });
+      },
+      tick: function(time, delta) {
+        if (!this.rigEl || !this.cameraEl) return;
+        if (this.axisX === 0 && this.axisY === 0) return;
+
+        const dt = Math.min(delta / 1000.0, 0.05);
+        const currentPos = this.rigEl.object3D.position;
+
+        const camRot = this.cameraEl.getAttribute('rotation');
+        const yaw = THREE.MathUtils.degToRad(camRot.y);
+
+        const fwdX = -Math.sin(yaw);
+        const fwdZ = -Math.cos(yaw);
+        const rightX = Math.cos(yaw);
+        const rightZ = -Math.sin(yaw);
+
+        const moveDist = this.data.speed * dt;
+        let dx = (fwdX * -this.axisY + rightX * this.axisX) * moveDist;
+        let dz = (fwdZ * -this.axisY + rightZ * this.axisX) * moveDist;
+
+        const bounded = moveWithSlide(currentPos, dx, dz);
+        currentPos.x = bounded.x;
+        currentPos.z = bounded.z;
+      }
+    });
+
+    // -------------------------------------------------------------
+    // Quest 2 Smooth Turn Component (Right Stick + Head Pivot)
+    // -------------------------------------------------------------
+    AFRAME.registerComponent('quest-smooth-turn', {
+      schema: {
+        turnSpeed: { type: 'number', default: 58.0 },
+        deadzone: { type: 'number', default: 0.14 }
+      },
+      init: function() {
+        this.turnAxis = 0;
+        this.rigEl = this.el.sceneEl.querySelector('#player-rig');
+        this.cameraEl = this.el.sceneEl.querySelector('#head-camera');
+
+        this.el.addEventListener('axismove', (evt) => {
+          const axes = evt.detail.axis;
+          if (axes && axes.length >= 2) {
+            let rawX = axes.length > 2 ? axes[2] : axes[0];
+            this.turnAxis = axisCurve(rawX, this.data.deadzone);
+          }
+        });
+      },
+      tick: function(time, delta) {
+        if (!this.rigEl || this.turnAxis === 0) return;
+        const dt = Math.min(delta / 1000.0, 0.05);
+        const dYaw = -this.turnAxis * this.data.turnSpeed * dt;
+        const rad = THREE.MathUtils.degToRad(dYaw);
+
+        if (this.cameraEl) {
+          const headWorld = new THREE.Vector3();
+          this.cameraEl.object3D.getWorldPosition(headWorld);
+
+          this.rigEl.object3D.rotation.y += rad;
+          this.rigEl.object3D.updateMatrixWorld(true);
+
+          const newHeadWorld = new THREE.Vector3();
+          this.cameraEl.object3D.getWorldPosition(newHeadWorld);
+
+          this.rigEl.object3D.position.x += headWorld.x - newHeadWorld.x;
+          this.rigEl.object3D.position.z += headWorld.z - newHeadWorld.z;
+        } else {
+          this.rigEl.object3D.rotation.y += rad;
+        }
+      }
+    });
+
+    // -------------------------------------------------------------
+    // Desktop WASD Keyboard Controls
+    // -------------------------------------------------------------
+    AFRAME.registerComponent('desktop-keyboard-nav', {
+      schema: { speed: { type: 'number', default: 2.4 } },
+      init: function() {
+        this.keys = {};
+        this.rigEl = document.querySelector('#player-rig');
+        this.cameraEl = document.querySelector('#head-camera');
+
+        window.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
+      },
+      tick: function(time, delta) {
+        if (!this.rigEl || !this.cameraEl) return;
+        let fwd = 0, right = 0;
+        if (this.keys['KeyW'] || this.keys['ArrowUp']) fwd += 1;
+        if (this.keys['KeyS'] || this.keys['ArrowDown']) fwd -= 1;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) right -= 1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) right += 1;
+
+        if (fwd === 0 && right === 0) return;
+
+        const dt = Math.min(delta / 1000.0, 0.05);
+        const camRot = this.cameraEl.getAttribute('rotation');
+        const yaw = THREE.MathUtils.degToRad(camRot.y);
+
+        const fwdX = -Math.sin(yaw);
+        const fwdZ = -Math.cos(yaw);
+        const rightX = Math.cos(yaw);
+        const rightZ = -Math.sin(yaw);
+
+        const moveDist = this.data.speed * dt;
+        let dx = (fwdX * fwd + rightX * right) * moveDist;
+        let dz = (fwdZ * fwd + rightZ * right) * moveDist;
+
+        const currentPos = this.rigEl.object3D.position;
+        const bounded = moveWithSlide(currentPos, dx, dz);
+        currentPos.x = bounded.x;
+        currentPos.z = bounded.z;
+      }
+    });
+
+    // =============================================================
+    // DYNAMIC STUDIO CONTROLLER: Canvas, Inserter & Voice Terminal
+    // =============================================================
+    class StudioManager {
+      constructor() {
+        this.wallCanvasEl = document.querySelector('#studio-wall-canvas');
+        this.canvasPlaqueTitle = document.querySelector('#canvas-plaque-title');
+        this.modelSlotEl = document.querySelector('#model-inserter-slot');
+        this.pedestalLabel = document.querySelector('#pedestal-label');
+        
+        // In-VR HUD elements
+        this.hudStatus = document.querySelector('#hud-status-text');
+        this.hudUserQuery = document.querySelector('#hud-user-query');
+        this.hudAiReply = document.querySelector('#hud-ai-reply');
+        this.micBtn = document.querySelector('#hud-mic-btn');
+        this.micLabel = document.querySelector('#hud-mic-label');
+
+        this.isListening = false;
+        this.recognition = null;
+        this.loader = new THREE.TextureLoader();
+
+        this.initSpeechRecognition();
+        this.initChips();
+      }
+
+      // -----------------------------------------------------------
+      // 1. Live Dynamic Canvas Update (NO RELOAD!)
+      // -----------------------------------------------------------
+      updateCanvas(textureUrl, titleText) {
+        if (!this.wallCanvasEl) return;
+        this.setStatus('🎨 Updating Wall Canvas...');
+
+        // Update title plaque
+        if (this.canvasPlaqueTitle) {
+          this.canvasPlaqueTitle.setAttribute('value', `${titleText} • Canvas Live`);
+        }
+
+        // Three.js direct texture swap without refreshing page
+        this.loader.load(textureUrl, (texture) => {
+          const mesh = this.wallCanvasEl.getObject3D('mesh');
+          if (mesh && mesh.material) {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            mesh.material.map = texture;
+            mesh.material.needsUpdate = true;
+          }
+          this.setStatus('🟢 ONLINE • READY FOR COMMANDS');
+        }, undefined, (err) => {
+          console.warn('Canvas texture load fallback:', err);
+          this.wallCanvasEl.setAttribute('material', 'src', textureUrl);
+          this.setStatus('🟢 ONLINE • READY FOR COMMANDS');
+        });
+      }
+
+      // -----------------------------------------------------------
+      // 2. Live Dynamic Model Inserter (Loads .glb On-the-Fly!)
+      // -----------------------------------------------------------
+      insertModel(modelPath, modelTitle, scaleFactor = 1.0) {
+        if (!this.modelSlotEl) return;
+        this.setStatus(`🗿 Loading 3D Model: ${modelTitle}...`);
+
+        if (this.pedestalLabel) {
+          this.pedestalLabel.setAttribute('value', `MODEL INSERTER • ${modelTitle.toUpperCase()}`);
+        }
+
+        // Clear existing model children
+        while (this.modelSlotEl.firstChild) {
+          this.modelSlotEl.removeChild(this.modelSlotEl.firstChild);
+        }
+
+        if (!modelPath || modelPath === 'clear') {
+          this.pedestalLabel.setAttribute('value', 'MODEL INSERTER • EMPTY PEDESTAL');
+          this.setStatus('🟢 ONLINE • PEDESTAL CLEARED');
+          return;
+        }
+
+        // Create new dynamic glTF entity inside slot
+        const newEntity = document.createElement('a-entity');
+        newEntity.setAttribute('gltf-model', modelPath);
+        newEntity.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+        newEntity.setAttribute('position', '0 0 0');
+        
+        // Add subtle scale-in animation
+        newEntity.setAttribute('animation__scale', {
+          property: 'scale',
+          from: '0.01 0.01 0.01',
+          to: `${scaleFactor} ${scaleFactor} ${scaleFactor}`,
+          dur: 800,
+          easing: 'easeOutBack'
+        });
+
+        this.modelSlotEl.appendChild(newEntity);
+        setTimeout(() => {
+          this.setStatus('🟢 ONLINE • MODEL INSTANTIATED');
+        }, 800);
+      }
+
+      // -----------------------------------------------------------
+      // 3. Speech Synthesis Audio Output in Headset
+      // -----------------------------------------------------------
+      speakReply(text) {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.rate = 1.05;
+          utter.pitch = 1.0;
+          utter.volume = 1.0;
+          window.speechSynthesis.speak(utter);
+        }
+      }
+
+      setStatus(text) {
+        if (this.hudStatus) this.hudStatus.setAttribute('value', text);
+      }
+
+      setDialogue(userText, aiText) {
+        if (this.hudUserQuery) this.hudUserQuery.setAttribute('value', `Christopher: ${userText}`);
+        if (this.hudAiReply) this.hudAiReply.setAttribute('value', `Antigravity: ${aiText}`);
+        this.speakReply(aiText);
+      }
+
+      // -----------------------------------------------------------
+      // 4. Voice Recognition (Single click to listen / click to end)
+      // -----------------------------------------------------------
+      initSpeechRecognition() {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRec) {
+          this.recognition = new SpeechRec();
+          this.recognition.continuous = false;
+          this.recognition.interimResults = false;
+          this.recognition.lang = 'en-US';
+
+          this.recognition.onresult = (evt) => {
+            const transcript = evt.results[0][0].transcript;
+            this.handleVoiceCommand(transcript);
+          };
+
+          this.recognition.onerror = (err) => {
+            console.warn('Speech Rec Error:', err);
+            this.resetMicBtn();
+          };
+
+          this.recognition.onend = () => {
+            this.resetMicBtn();
+          };
+        }
+
+        if (this.micBtn) {
+          this.micBtn.addEventListener('click', () => {
+            if (!this.recognition) {
+              this.setDialogue("Speech recognition not available.", "Please tap any of the prompt chips below to test live canvas updates and model insertion.");
+              return;
+            }
+
+            if (!this.isListening) {
+              this.isListening = true;
+              this.micBtn.setAttribute('material', 'color', '#059669'); // Emerald
+              this.micLabel.setAttribute('value', '🟢 LISTENING... SPEAK NOW (CLICK TO SEND)');
+              this.setStatus('🟢 LISTENING TO CHRISTOPHER...');
+              try { this.recognition.start(); } catch(e) { console.warn(e); }
+            } else {
+              this.isListening = false;
+              this.micBtn.setAttribute('material', 'color', '#d97706'); // Amber
+              this.micLabel.setAttribute('value', '⏳ PROCESSING COMMAND...');
+              this.setStatus('⏳ PROCESSING SPEECH...');
+              try { this.recognition.stop(); } catch(e) { console.warn(e); }
+            }
+          });
+        }
+      }
+
+      resetMicBtn() {
+        this.isListening = false;
+        if (this.micBtn) this.micBtn.setAttribute('material', 'color', '#0284c7');
+        if (this.micLabel) this.micLabel.setAttribute('value', '🎙️ PUSH TO SPEAK (CLICK ONCE)');
+        this.setStatus('🟢 ONLINE • READY FOR COMMANDS');
+      }
+
+      // -----------------------------------------------------------
+      // 5. Intelligent Intent Processor (Dispatches Actions Live)
+      // -----------------------------------------------------------
+      handleVoiceCommand(rawText) {
+        const text = rawText.trim();
+        const lower = text.toLowerCase();
+        this.setStatus(`Executing: "${text}"`);
+
+        // Check for Canvas Paint commands
+        if (lower.includes('paint') || lower.includes('dawn') || lower.includes('cosmic') || lower.includes('canvas')) {
+          if (lower.includes('hearth') || lower.includes('fire')) {
+            this.updateCanvas('./textures/canvas_living_hearth.jpg', 'Living Hearth Sanctuary');
+            this.setDialogue(text, "Updating the wall canvas to the Living Hearth sanctuary painting.");
+          } else if (lower.includes('odyssey') || lower.includes('retrospective')) {
+            this.updateCanvas('./textures/canvas_odyssey_panorama.jpg', 'The Collaborative Odyssey');
+            this.setDialogue(text, "Illuminating the canvas with our panoramic Odyssey chronicle.");
+          } else if (lower.includes('blender') || lower.includes('forge')) {
+            this.updateCanvas('./textures/canvas_blender_forge.jpg', 'Blender Agentic Forge');
+            this.setDialogue(text, "Displaying the 3D Agentic Forge architectural concept on the canvas.");
+          } else {
+            this.updateCanvas('./textures/canvas_cosmic_dawn.jpg', 'Orbital Cosmic Dawn');
+            this.setDialogue(text, "Painting the high-resolution Orbital Cosmic Dawn onto our gallery wall.");
+          }
+          return;
+        }
+
+        // Check for Model Inserter commands
+        if (lower.includes('insert') || lower.includes('model') || lower.includes('robot') || lower.includes('statue') || lower.includes('table') || lower.includes('clear')) {
+          if (lower.includes('clear') || lower.includes('remove') || lower.includes('empty')) {
+            this.insertModel('clear', 'Empty');
+            this.setDialogue(text, "Cleared the model inserter table. The pedestal is now open.");
+          } else if (lower.includes('robot') || lower.includes('companion')) {
+            this.insertModel('./models/antigravity_robot.glb', 'Antigravity Robot', 0.9);
+            this.setDialogue(text, "Materializing our living Antigravity robot companion onto the pedestal.");
+          } else if (lower.includes('hoverbot') || lower.includes('drone') || lower.includes('bot')) {
+            this.insertModel('./models/glimmer_hoverbot.glb', 'Glimmer Hoverbot', 1.1);
+            this.setDialogue(text, "Deploying the Glimmer Hoverbot 3D model onto the table dais.");
+          } else if (lower.includes('tesla') || lower.includes('optimus')) {
+            this.insertModel('./models/tesla_optimus_pbr.glb', 'Tesla Optimus PBR', 0.85);
+            this.setDialogue(text, "Loading the Tesla Optimus Gen 2 PBR model onto the table.");
+          } else if (lower.includes('plant') || lower.includes('flora')) {
+            this.insertModel('./models/conservatory_plant_pbr.glb', 'Conservatory Flora', 1.0);
+            this.setDialogue(text, "Placing the botanical conservatory specimen onto the pedestal.");
+          } else {
+            this.insertModel('./models/blender_nexus_monolith.glb', 'Nexus Monolith', 1.2);
+            this.setDialogue(text, "Materializing the procedural Nexus Monolith onto the center dais.");
+          }
+          return;
+        }
+
+        // General Spoken Conversation
+        this.setDialogue(text, `I heard: "${text}". Standing by in the VR Studio Sandbox, Christopher.`);
+      }
+
+      // -----------------------------------------------------------
+      // 6. Hook Quick Prompt Chips
+      // -----------------------------------------------------------
+      initChips() {
+        // Art Chips
+        document.querySelector('#chip-art-dawn')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Paint the cosmic dawn on the wall canvas");
+        });
+        document.querySelector('#chip-art-hearth')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Paint the living hearth by the fire");
+        });
+        document.querySelector('#chip-art-odyssey')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Show the odyssey panorama on the canvas");
+        });
+        document.querySelector('#chip-art-blender')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Display the blender forge artwork");
+        });
+
+        // Model Chips
+        document.querySelector('#chip-mod-robot')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Insert the robot companion model on the table");
+        });
+        document.querySelector('#chip-mod-bot')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Insert the hoverbot model on the pedestal");
+        });
+        document.querySelector('#chip-mod-tesla')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Insert tesla optimus on the table");
+        });
+        document.querySelector('#chip-clear-pedestal')?.addEventListener('click', () => {
+          this.handleVoiceCommand("Clear the table pedestal");
+        });
+      }
+    }
+
+    // Initialize when A-Frame scene is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      const scene = document.querySelector('a-scene');
+      if (scene.hasLoaded) {
+        window.studioMgr = new StudioManager();
+      } else {
+        scene.addEventListener('loaded', () => {
+          window.studioMgr = new StudioManager();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
