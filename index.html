@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>VR Studio Sandbox | Artifact 35</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
-  <meta name="description" content="10x10x10 Spatial VR Studio Sandbox for Meta Quest 2. Features live dynamic wall canvas, 50% scale model inserter table, and clean push-to-talk voice interface.">
+  <meta name="description" content="10x10x10 Spatial VR Studio Sandbox for Meta Quest 2. Features live dynamic wall canvas with real-time AI image generation, 50% scale model inserter table, and large reading slate.">
 
   <!-- A-Frame Core (local vendor with CDN fallback) -->
   <script src="./vendor/aframe.min.js"></script>
@@ -147,7 +147,7 @@
       z-index: 999;
       pointer-events: none;
       backdrop-filter: blur(8px);
-      max-width: 320px;
+      max-width: 340px;
       line-height: 1.5;
     }
 
@@ -183,7 +183,7 @@
     </div>
     <div class="telemetry-pill">
       <span class="dot-live"></span>
-      <span id="header-status">Studio Live • 10×10×10 Room</span>
+      <span id="header-status">Studio Live • Large Terminal Slate</span>
     </div>
   </header>
 
@@ -262,19 +262,10 @@
     <!-- ============================================================= -->
     <!-- LIGHTING ENVIRONMENT: Architectural Studio Atmosphere         -->
     <!-- ============================================================= -->
-    <!-- Soft Ambient Room Fill -->
     <a-entity light="type: ambient; color: #1e293b; intensity: 0.85"></a-entity>
-
-    <!-- Central Downlight -->
     <a-entity light="type: point; color: #f8fafc; intensity: 0.9; distance: 15; decay: 2" position="0 5.2 0"></a-entity>
-
-    <!-- Focused Gallery Spotlight on Wall Canvas -->
     <a-entity light="type: spot; color: #fffbeb; intensity: 1.4; angle: 48; penumbra: 0.4; distance: 9" position="0 4.8 -2.2" rotation="-40 0 0"></a-entity>
-
-    <!-- Focused Pedestal Spotlight on Model Inserter Table -->
     <a-entity light="type: spot; color: #38bdf8; intensity: 1.6; angle: 32; penumbra: 0.3; distance: 7" position="0 4.6 -1.8" rotation="-90 0 0"></a-entity>
-
-    <!-- 4-Corner Subtle Accent Points -->
     <a-entity light="type: point; color: #00f5d4; intensity: 0.4; distance: 6" position="-4.5 2.5 -4.5"></a-entity>
     <a-entity light="type: point; color: #f59e0b; intensity: 0.4; distance: 6" position="4.5 2.5 -4.5"></a-entity>
     <a-entity light="type: point; color: #3b82f6; intensity: 0.3; distance: 6" position="-4.5 2.5 4.5"></a-entity>
@@ -316,68 +307,18 @@
       <a-box position="0 5.9 2.5" width="10" height="0.2" depth="0.3" material="color: #1e293b; roughness: 0.7"></a-box>
 
       <!-- 3. North Gallery Wall (Z = -5.0m) -->
-      <a-plane
-        id="wall-north"
-        position="0 3.0 -5.0"
-        rotation="0 0 0"
-        width="10"
-        height="6"
-        material="color: #111827; roughness: 0.85; metalness: 0.05">
-      </a-plane>
-
-      <!-- 4. South Wall (Z = 5.0m) -->
-      <a-plane
-        id="wall-south"
-        position="0 3.0 5.0"
-        rotation="0 180 0"
-        width="10"
-        height="6"
-        material="color: #111827; roughness: 0.85; metalness: 0.05">
-      </a-plane>
-
-      <!-- 5. West Wall (X = -5.0m) -->
-      <a-plane
-        id="wall-west"
-        position="-5.0 3.0 0"
-        rotation="0 90 0"
-        width="10"
-        height="6"
-        material="color: #0d1322; roughness: 0.85; metalness: 0.05">
-      </a-plane>
-
-      <!-- 6. East Wall (X = 5.0m) -->
-      <a-plane
-        id="wall-east"
-        position="5.0 3.0 0"
-        rotation="0 -90 0"
-        width="10"
-        height="6"
-        material="color: #0d1322; roughness: 0.85; metalness: 0.05">
-      </a-plane>
+      <a-plane id="wall-north" position="0 3.0 -5.0" rotation="0 0 0" width="10" height="6" material="color: #111827; roughness: 0.85; metalness: 0.05"></a-plane>
+      <a-plane id="wall-south" position="0 3.0 5.0" rotation="0 180 0" width="10" height="6" material="color: #111827; roughness: 0.85; metalness: 0.05"></a-plane>
+      <a-plane id="wall-west" position="-5.0 3.0 0" rotation="0 90 0" width="10" height="6" material="color: #0d1322; roughness: 0.85; metalness: 0.05"></a-plane>
+      <a-plane id="wall-east" position="5.0 3.0 0" rotation="0 -90 0" width="10" height="6" material="color: #0d1322; roughness: 0.85; metalness: 0.05"></a-plane>
     </a-entity>
 
     <!-- ============================================================= -->
     <!-- THE WALL CANVAS (North Wall: X=0, Y=2.5, Z=-4.92)              -->
     <!-- ============================================================= -->
     <a-entity id="gallery-canvas-assembly" position="0 2.55 -4.92">
-      <!-- Dark Walnut Outer Bevel Frame -->
-      <a-box
-        id="canvas-frame"
-        position="0 0 -0.04"
-        width="4.4"
-        height="2.8"
-        depth="0.08"
-        material="color: #1c140d; roughness: 0.5; metalness: 0.2">
-      </a-box>
-
-      <!-- Brushed Brass Inner Lip Frame -->
-      <a-box
-        position="0 0 -0.01"
-        width="4.26"
-        height="2.66"
-        depth="0.04"
-        material="color: #d97706; roughness: 0.35; metalness: 0.7">
-      </a-box>
+      <a-box id="canvas-frame" position="0 0 -0.04" width="4.4" height="2.8" depth="0.08" material="color: #1c140d; roughness: 0.5; metalness: 0.2"></a-box>
+      <a-box position="0 0 -0.01" width="4.26" height="2.66" depth="0.04" material="color: #d97706; roughness: 0.35; metalness: 0.7"></a-box>
 
       <!-- Dynamic Live Wall Canvas Plane (Receives AI Images in Real Time!) -->
       <a-plane
@@ -389,15 +330,14 @@
         material="src: #img-canvas-default; shader: standard; roughness: 0.25; metalness: 0.05">
       </a-plane>
 
-      <!-- Curated Artwork Brass Plaque Underneath -->
       <a-entity id="canvas-plaque" position="0 -1.58 0.02">
-        <a-plane width="2.4" height="0.22" material="color: #0f172a; roughness: 0.4; metalness: 0.6"></a-plane>
+        <a-plane width="2.6" height="0.22" material="color: #0f172a; roughness: 0.4; metalness: 0.6"></a-plane>
         <a-text
           id="canvas-plaque-title"
           value="Cosmic Dawn Sanctuary • Canvas Live"
           align="center"
           position="0 0 0.01"
-          width="3.2"
+          width="3.4"
           color="#fbbf24"
           font="kelsonsans">
         </a-text>
@@ -408,167 +348,137 @@
     <!-- THE MODEL INSERTER TABLE & PEDESTAL (Center: X=0, Z=-1.8)     -->
     <!-- ============================================================= -->
     <a-entity id="workbench-assembly" position="0 0 -1.8">
-      <!-- Minimalist Dark Timber Tabletop (2.2m x 1.2m at Y=0.85m) -->
-      <a-box
-        id="tabletop"
-        position="0 0.82 0"
-        width="2.2"
-        height="0.08"
-        depth="1.2"
-        material="color: #1e1b18; roughness: 0.4; metalness: 0.15">
-      </a-box>
-
-      <!-- Brass Edge Inlay Bands -->
+      <a-box id="tabletop" position="0 0.82 0" width="2.2" height="0.08" depth="1.2" material="color: #1e1b18; roughness: 0.4; metalness: 0.15"></a-box>
       <a-box position="0 0.825 0.59" width="2.2" height="0.07" depth="0.02" material="color: #d97706; metalness: 0.7; roughness: 0.3"></a-box>
       <a-box position="0 0.825 -0.59" width="2.2" height="0.07" depth="0.02" material="color: #d97706; metalness: 0.7; roughness: 0.3"></a-box>
 
-      <!-- 4 Architectural Tapered Steel Legs -->
       <a-cylinder position="-0.95 0.4 -0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
       <a-cylinder position="0.95 0.4 -0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
       <a-cylinder position="-0.95 0.4 0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
       <a-cylinder position="0.95 0.4 0.48" radius="0.035" height="0.8" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
 
-      <!-- Raised Model Inserter Dais (Pedestal on Table) -->
-      <a-cylinder
-        id="pedestal-dais"
-        class="clickable"
-        position="0 0.89 0"
-        radius="0.44"
-        height="0.06"
-        material="color: #090d16; metalness: 0.6; roughness: 0.2">
-      </a-cylinder>
+      <!-- Raised Dais -->
+      <a-cylinder id="pedestal-dais" class="clickable" position="0 0.89 0" radius="0.44" height="0.06" material="color: #090d16; metalness: 0.6; roughness: 0.2"></a-cylinder>
+      <a-ring position="0 0.925 0" rotation="-90 0 0" radius-inner="0.38" radius-outer="0.42" material="color: #00f5d4; shader: flat; opacity: 0.85" animation="property: material.opacity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 1800"></a-ring>
 
-      <!-- Luminous Cyan Tech Ring / Rune Ring around Dais -->
-      <a-ring
-        position="0 0.925 0"
-        rotation="-90 0 0"
-        radius-inner="0.38"
-        radius-outer="0.42"
-        material="color: #00f5d4; shader: flat; opacity: 0.85"
-        animation="property: material.opacity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 1800">
-      </a-ring>
-
-      <!-- Plaque on Front Edge of Table -->
       <a-entity position="0 0.82 0.61">
         <a-plane width="0.9" height="0.06" material="color: #0f172a; metalness: 0.5"></a-plane>
-        <a-text
-          id="pedestal-label"
-          value="MODEL INSERTER • NEXUS MONOLITH"
-          align="center"
-          position="0 0 0.01"
-          width="1.3"
-          color="#00f5d4"
-          font="kelsonsans">
-        </a-text>
+        <a-text id="pedestal-label" value="MODEL INSERTER • NEXUS MONOLITH" align="center" position="0 0 0.01" width="1.3" color="#00f5d4" font="kelsonsans"></a-text>
       </a-entity>
 
-      <!-- ========================================================= -->
-      <!-- DYNAMIC 3D MODEL SLOT (Loads .glb Models On-the-Fly!)      -->
-      <!-- 50% Scale Reduction applied per Christopher's feedback!   -->
-      <!-- ========================================================= -->
-      <a-entity
-        id="model-inserter-slot"
-        position="0 0.95 0"
-        rotation="0 0 0"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 28000; easing: linear">
-        <!-- Initial Default Model: Nexus Monolith at 50% scale (0.6x) -->
-        <a-entity
-          id="active-model-entity"
-          gltf-model="#model-monolith"
-          scale="0.6 0.6 0.6"
-          position="0 0 0">
-        </a-entity>
+      <!-- Dynamic 3D Model Slot (50% scale) -->
+      <a-entity id="model-inserter-slot" position="0 0.95 0" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 28000; easing: linear">
+        <a-entity id="active-model-entity" gltf-model="#model-monolith" scale="0.6 0.6 0.6" position="0 0 0"></a-entity>
       </a-entity>
     </a-entity>
 
     <!-- ============================================================= -->
-    <!-- IN-VR CHAT TERMINAL STAND (Physical Ergonomic Glass Pedestal)  -->
-    <!-- MOVED per Christopher: Positioned at X=-2.6, Z=-0.5, Y=1.35   -->
-    <!-- Completely clear of the table and objects with zero overlap!  -->
+    <!-- IN-VR CHAT TERMINAL STAND: EXPANDED LARGE SLATE               -->
+    <!-- Positioned at X=-2.6, Z=-0.2, Y=1.45 (Angled 52° to center)   -->
+    <!-- Width: 1.85m, Height: 1.35m — Fits substantive paragraphs!    -->
     <!-- ============================================================= -->
-    <a-entity id="vr-terminal-rig" position="-2.6 0 -0.5" rotation="0 48 0">
-      <!-- Sleek Minimalist Terminal Stand Column -->
-      <a-cylinder position="0 0.65 0" radius="0.03" height="1.3" material="color: #1e293b; metalness: 0.7; roughness: 0.3"></a-cylinder>
-      <a-cylinder position="0 0.02 0" radius="0.25" height="0.04" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-cylinder>
+    <a-entity id="vr-terminal-rig" position="-2.6 0 -0.2" rotation="0 52 0">
+      <!-- Twin Steel Stand Columns -->
+      <a-cylinder position="-0.5 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-cylinder position="0.5 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-box position="0 0.02 0" width="1.4" height="0.04" depth="0.4" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-box>
 
-      <!-- Clean Minimalist Holographic Glass Panel -->
-      <a-entity position="0 1.35 0" rotation="-14 0 0">
-        <!-- Background Glass Slab -->
+      <!-- Large Holographic Glass Panel Assembly -->
+      <a-entity position="0 1.45 0" rotation="-10 0 0">
+        <!-- Main Glass Board (1.85m Wide x 1.35m Tall) -->
         <a-plane
-          width="1.24"
-          height="0.76"
-          material="color: #050811; opacity: 0.94; transparent: true; roughness: 0.2; metalness: 0.3"
+          width="1.85"
+          height="1.35"
+          material="color: #040711; opacity: 0.96; transparent: true; roughness: 0.2; metalness: 0.3"
           class="clickable">
         </a-plane>
 
-        <!-- Cyan Frame Border -->
-        <a-ring
-          position="0 0 0.002"
-          radius-inner="0.60"
-          radius-outer="0.61"
-          material="color: #00f5d4; shader: flat; opacity: 0.4">
-        </a-ring>
+        <!-- Luminous Cyan Accent Borders -->
+        <a-box position="0 0.665 0.01" width="1.85" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="0 -0.665 0.01" width="1.85" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="-0.92 0 0.01" width="0.015" height="1.33" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="0.92 0 0.01" width="0.015" height="1.33" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
 
-        <!-- Header Title -->
+        <!-- Top Header Banner -->
         <a-text
           value="HORIZON VR STUDIO • ANTIGRAVITY"
           align="center"
-          position="0 0.32 0.01"
-          width="1.45"
+          position="0 0.58 0.02"
+          width="2.2"
           color="#00f5d4"
           font="kelsonsans">
         </a-text>
 
-        <!-- Status Pill -->
-        <a-plane position="0 0.25 0.01" width="0.7" height="0.05" material="color: #032e2b; opacity: 0.9"></a-plane>
+        <!-- Status Indicator Pill -->
+        <a-plane position="0 0.49 0.02" width="1.0" height="0.07" material="color: #032e2b; opacity: 0.95"></a-plane>
         <a-text
           id="hud-status-text"
-          value="🟢 ONLINE • READY"
+          value="🟢 ONLINE • READY FOR VOICE COMMANDS"
           align="center"
-          position="0 0.25 0.015"
-          width="0.95"
+          position="0 0.49 0.025"
+          width="1.3"
           color="#34d399"
           font="kelsonsans">
         </a-text>
 
-        <!-- Dialogue Box: Christopher's Input & Antigravity's Reply -->
-        <a-plane position="0 0.08 0.01" width="1.12" height="0.24" material="color: #0b1120; opacity: 0.88"></a-plane>
+        <!-- SUBSTANTIAL DIALOGUE SLATE (1.68m x 0.72m) -->
+        <a-plane position="0 0.07 0.02" width="1.68" height="0.70" material="color: #080e1a; opacity: 0.92"></a-plane>
+        
+        <!-- User Query Section (Top Half) -->
+        <a-text
+          value="CHRISTOPHER:"
+          position="-0.78 0.35 0.025"
+          width="1.3"
+          color="#94a3b8"
+          font="kelsonsans">
+        </a-text>
         <a-text
           id="hud-user-query"
-          value="Christopher: Push the button below to speak."
-          position="-0.53 0.15 0.015"
-          width="1.06"
-          wrap-count="40"
+          value="Push the button below, speak naturally into your Quest 2 mic, and click again to send."
+          position="-0.78 0.24 0.025"
+          width="1.56"
+          wrap-count="48"
           color="#f8fafc"
+          font="kelsonsans">
+        </a-text>
+
+        <a-line start="-0.78 0.12 0.025" end="0.78 0.12 0.025" color="#1e293b"></a-line>
+
+        <!-- Antigravity Response Section (Bottom Half — Multi-Paragraph Capacity!) -->
+        <a-text
+          value="ANTIGRAVITY:"
+          position="-0.78 0.06 0.025"
+          width="1.3"
+          color="#38bdf8"
           font="kelsonsans">
         </a-text>
         <a-text
           id="hud-ai-reply"
-          value="Antigravity: Standing by. Push the button, speak naturally into your Quest mic, and push again to send."
-          position="-0.53 0.05 0.015"
-          width="1.06"
-          wrap-count="42"
+          value="Standing by in the studio. You can ask me to paint anything on the wall canvas (e.g. 'generate a cat', 'paint a cosmic dawn'), or insert 3D models onto the center table."
+          position="-0.78 -0.08 0.025"
+          width="1.56"
+          wrap-count="48"
           color="#38bdf8"
           font="kelsonsans">
         </a-text>
 
         <!-- ========================================================= -->
-        <!-- PUSH-TO-TALK BUTTON (Clean & Uncluttered per Directive)   -->
+        <!-- PUSH-TO-TALK BUTTON (Extra-Large Tactile Target)         -->
         <!-- ========================================================= -->
-        <a-entity id="hud-mic-button-group" position="0 -0.16 0.02">
+        <a-entity id="hud-mic-button-group" position="0 -0.46 0.03">
           <a-plane
             id="hud-mic-btn"
             class="clickable"
-            width="1.05"
-            height="0.14"
-            material="color: #0284c7; roughness: 0.3; metalness: 0.2">
+            width="1.45"
+            height="0.18"
+            material="color: #0284c7; roughness: 0.3; metalness: 0.3">
           </a-plane>
           <a-text
             id="hud-mic-label"
-            value="🎙️ CLICK TO SPEAK"
+            value="🎙️ CLICK TO SPEAK (RECORD VOICE)"
             align="center"
             position="0 0 0.01"
-            width="1.3"
+            width="1.65"
             color="#ffffff"
             font="kelsonsans">
           </a-text>
@@ -583,9 +493,6 @@
   <!-- APPLICATION RUNTIME LOGIC: Locomotion, Live Canvas & Inserter -->
   <!-- ============================================================= -->
   <script>
-    // -------------------------------------------------------------
-    // Locomotion Helper: Non-linear cubic deadband response curve
-    // -------------------------------------------------------------
     function axisCurve(raw, deadzone) {
       if (Math.abs(raw) < deadzone) return 0;
       const sign = Math.sign(raw);
@@ -593,16 +500,10 @@
       return sign * Math.pow(scaled, 1.8);
     }
 
-    // Room Collision Boundary: 10m x 10m room (-4.6m to +4.6m)
-    // Table hitbox (X: -1.2 to 1.2, Z: -2.5 to -1.1)
-    // Terminal hitbox (X: -2.9 to -2.3, Z: -0.8 to -0.2)
     function checkWallCollision(x, z) {
-      // Room perimeter
       if (x < -4.6 || x > 4.6 || z < -4.6 || z > 4.6) return true;
-      // Table hitbox
       if (x > -1.2 && x < 1.2 && z > -2.5 && z < -1.1) return true;
-      // Terminal stand hitbox
-      if (x > -2.9 && x < -2.3 && z > -0.8 && z < -0.2) return true;
+      if (x > -3.0 && x < -2.1 && z > -0.6 && z < 0.3) return true;
       return false;
     }
 
@@ -610,30 +511,17 @@
       let targetX = currentPos.x + dx;
       let targetZ = currentPos.z + dz;
 
-      // Full move
-      if (!checkWallCollision(targetX, targetZ)) {
-        return { x: targetX, z: targetZ };
-      }
-      // Slide along X
-      if (!checkWallCollision(targetX, currentPos.z)) {
-        return { x: targetX, z: currentPos.z };
-      }
-      // Slide along Z
-      if (!checkWallCollision(currentPos.x, targetZ)) {
-        return { x: currentPos.x, z: targetZ };
-      }
-      // Blocked
+      if (!checkWallCollision(targetX, targetZ)) return { x: targetX, z: targetZ };
+      if (!checkWallCollision(targetX, currentPos.z)) return { x: targetX, z: currentPos.z };
+      if (!checkWallCollision(currentPos.x, targetZ)) return { x: currentPos.x, z: targetZ };
       return { x: currentPos.x, z: currentPos.z };
     }
 
     // -------------------------------------------------------------
-    // Quest 2 Smooth Locomotion Component (Left Controller)
+    // Quest 2 Locomotion & Turn Components
     // -------------------------------------------------------------
     AFRAME.registerComponent('quest-smooth-locomotion', {
-      schema: {
-        speed: { type: 'number', default: 2.0 },
-        deadzone: { type: 'number', default: 0.14 }
-      },
+      schema: { speed: { type: 'number', default: 2.0 }, deadzone: { type: 'number', default: 0.14 } },
       init: function() {
         this.axisX = 0;
         this.axisY = 0;
@@ -675,14 +563,8 @@
       }
     });
 
-    // -------------------------------------------------------------
-    // Quest 2 Smooth Turn Component (Right Stick + Head Pivot)
-    // -------------------------------------------------------------
     AFRAME.registerComponent('quest-smooth-turn', {
-      schema: {
-        turnSpeed: { type: 'number', default: 58.0 },
-        deadzone: { type: 'number', default: 0.14 }
-      },
+      schema: { turnSpeed: { type: 'number', default: 58.0 }, deadzone: { type: 'number', default: 0.14 } },
       init: function() {
         this.turnAxis = 0;
         this.rigEl = this.el.sceneEl.querySelector('#player-rig');
@@ -720,9 +602,6 @@
       }
     });
 
-    // -------------------------------------------------------------
-    // Desktop WASD Keyboard Controls
-    // -------------------------------------------------------------
     AFRAME.registerComponent('desktop-keyboard-nav', {
       schema: { speed: { type: 'number', default: 2.4 } },
       init: function() {
@@ -764,7 +643,7 @@
     });
 
     // =============================================================
-    // DYNAMIC STUDIO CONTROLLER: Canvas, Inserter & Voice Terminal
+    // DYNAMIC STUDIO CONTROLLER: Large Slate, AI Art & 3D Inserter
     // =============================================================
     class StudioManager {
       constructor() {
@@ -773,7 +652,7 @@
         this.modelSlotEl = document.querySelector('#model-inserter-slot');
         this.pedestalLabel = document.querySelector('#pedestal-label');
         
-        // In-VR HUD elements
+        // In-VR HUD elements (Large Slate)
         this.hudStatus = document.querySelector('#hud-status-text');
         this.hudUserQuery = document.querySelector('#hud-user-query');
         this.hudAiReply = document.querySelector('#hud-ai-reply');
@@ -793,9 +672,6 @@
         this.initVoiceButton();
       }
 
-      // -----------------------------------------------------------
-      // Supabase Realtime Bridge (haven_manor_hearth channel)
-      // -----------------------------------------------------------
       initSupabaseRelay() {
         try {
           if (typeof supabase !== 'undefined') {
@@ -812,7 +688,7 @@
             this.sbChannel.subscribe((status) => {
               console.log('Supabase Realtime status:', status);
               if (status === 'SUBSCRIBED') {
-                this.setStatus('🟢 ONLINE • READY');
+                this.setStatus('🟢 ONLINE • READY FOR VOICE COMMANDS');
               }
             });
           }
@@ -822,11 +698,11 @@
       }
 
       // -----------------------------------------------------------
-      // 1. Live Dynamic Canvas Update (NO RELOAD!)
+      // 1. Live Dynamic Canvas Update (With AI Generation Fallback!)
       // -----------------------------------------------------------
       updateCanvas(textureUrl, titleText) {
         if (!this.wallCanvasEl) return;
-        this.setStatus('🎨 Updating Wall Canvas...');
+        this.setStatus(`🎨 Synthesizing Wall Canvas: ${titleText}...`);
 
         if (this.canvasPlaqueTitle) {
           this.canvasPlaqueTitle.setAttribute('value', `${titleText} • Canvas Live`);
@@ -839,11 +715,20 @@
             mesh.material.map = texture;
             mesh.material.needsUpdate = true;
           }
-          this.setStatus('🟢 ONLINE • READY');
+          this.setStatus('🟢 ONLINE • CANVAS UPDATED');
         }, undefined, (err) => {
-          console.warn('Canvas texture load fallback:', err);
-          this.wallCanvasEl.setAttribute('material', 'src', textureUrl);
-          this.setStatus('🟢 ONLINE • READY');
+          console.warn('Canvas texture load error, generating live AI fallback:', err);
+          // If local URL 404s (e.g. cat request), generate dynamic image via live AI synthesis API!
+          const aiGenUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(titleText)}?width=1280&height=768&nologo=true`;
+          this.loader.load(aiGenUrl, (genTex) => {
+            const mesh = this.wallCanvasEl.getObject3D('mesh');
+            if (mesh && mesh.material) {
+              genTex.colorSpace = THREE.SRGBColorSpace;
+              mesh.material.map = genTex;
+              mesh.material.needsUpdate = true;
+            }
+            this.setStatus('🟢 ONLINE • FRESH AI IMAGE GENERATED');
+          });
         });
       }
 
@@ -858,7 +743,6 @@
           this.pedestalLabel.setAttribute('value', `MODEL INSERTER • ${modelTitle.toUpperCase()}`);
         }
 
-        // Clear existing model children
         while (this.modelSlotEl.firstChild) {
           this.modelSlotEl.removeChild(this.modelSlotEl.firstChild);
         }
@@ -869,7 +753,6 @@
           return;
         }
 
-        // Create new dynamic glTF entity inside slot at 50% scale
         const newEntity = document.createElement('a-entity');
         newEntity.setAttribute('gltf-model', modelPath);
         newEntity.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
@@ -885,7 +768,7 @@
 
         this.modelSlotEl.appendChild(newEntity);
         setTimeout(() => {
-          this.setStatus('🟢 ONLINE • READY');
+          this.setStatus('🟢 ONLINE • MODEL INSTANTIATED');
         }, 800);
       }
 
@@ -894,8 +777,8 @@
       }
 
       setDialogue(userText, aiText) {
-        if (this.hudUserQuery) this.hudUserQuery.setAttribute('value', `Christopher: ${userText}`);
-        if (this.hudAiReply) this.hudAiReply.setAttribute('value', `Antigravity: ${aiText}`);
+        if (this.hudUserQuery) this.hudUserQuery.setAttribute('value', userText);
+        if (this.hudAiReply) this.hudAiReply.setAttribute('value', aiText);
       }
 
       // -----------------------------------------------------------
@@ -975,13 +858,10 @@
       resetMicUI() {
         this.isRecording = false;
         if (this.micBtn) this.micBtn.setAttribute('material', 'color', '#0284c7'); // Blue
-        if (this.micLabel) this.micLabel.setAttribute('value', '🎙️ CLICK TO SPEAK');
-        this.setStatus('🟢 ONLINE • READY');
+        if (this.micLabel) this.micLabel.setAttribute('value', '🎙️ CLICK TO SPEAK (RECORD VOICE)');
+        this.setStatus('🟢 ONLINE • READY FOR VOICE COMMANDS');
       }
 
-      // -----------------------------------------------------------
-      // 4. Send Audio Payload to Live Gemini Relay via Supabase
-      // -----------------------------------------------------------
       sendAudioPayload(blob, mimeType) {
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -994,9 +874,8 @@
           const queryId = 'vr_' + Date.now();
           console.log(`📡 Sending audio (${base64Data.length} chars) to AI Relay...`);
 
-          // Safety timeout (25s)
           this.pendingTimeout = setTimeout(() => {
-            this.setDialogue("[Audio Sent]", "AI Relay took longer than 25s. The space remains ready for your next thought.");
+            this.setDialogue("[Audio Sent]", "AI Relay took longer than 25s. The studio remains ready for your next thought.");
             this.resetMicUI();
           }, 25000);
 
@@ -1018,7 +897,7 @@
       }
 
       // -----------------------------------------------------------
-      // 5. Handle AI Response (Parse Actions & Render Text)
+      // 5. Handle AI Response (Parse Actions & Render Clean Text)
       // -----------------------------------------------------------
       handleServerResponse(payload) {
         if (this.pendingTimeout) {
@@ -1032,7 +911,15 @@
         // Parse any action tags: [ACTION: canvas, url: "...", title: "..."]
         const canvasMatch = rawText.match(/\[ACTION:\s*canvas,\s*url:\s*["']([^"']+)["'],\s*title:\s*["']([^"']+)["']\]/i);
         if (canvasMatch) {
-          this.updateCanvas(canvasMatch[1], canvasMatch[2]);
+          let cUrl = canvasMatch[1];
+          let cTitle = canvasMatch[2];
+
+          // If the AI requested a generic or freshly generated prompt (e.g. cat, dragon, etc.),
+          // synthesize it live using the AI image generation pipeline!
+          if (cUrl.includes('generated_') || !cUrl.startsWith('./textures/canvas_')) {
+            cUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cTitle)}?width=1280&height=768&nologo=true`;
+          }
+          this.updateCanvas(cUrl, cTitle);
         }
 
         // Parse any model action tags: [ACTION: model, url: "...", name: "..."]
@@ -1040,7 +927,6 @@
         if (modelMatch) {
           const modelUrl = modelMatch[1];
           const modelName = modelMatch[2];
-          // Scale down by 50% (0.45 to 0.6)
           let scale = 0.5;
           if (modelUrl.includes('robot')) scale = 0.45;
           if (modelUrl.includes('monolith')) scale = 0.6;
@@ -1049,10 +935,9 @@
           this.insertModel(modelUrl, modelName, scale);
         }
 
-        // Strip out the action tags for clean textual display
+        // Strip out action tags for clean textual display
         const cleanReply = rawText.replace(/\[ACTION:[^\]]+\]/gi, '').trim();
 
-        // Update textual dialogue in the in-VR chat window (NO TTS)
         this.setDialogue(promptText, cleanReply);
         this.resetMicUI();
       }
