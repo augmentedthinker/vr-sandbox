@@ -167,9 +167,280 @@
       font-size: 10.5px;
       color: #f8fafc;
     }
+
+    /* ============================================================= */
+    /* PASSCODE GATEKEEPER LOCK SCREEN (PIN: 0214)                   */
+    /* ============================================================= */
+    .gatekeeper-backdrop {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(16px);
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .gatekeeper-backdrop.unlocked {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .gatekeeper-card {
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(0, 245, 212, 0.35);
+      box-shadow: 0 0 50px rgba(0, 245, 212, 0.15), 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border-radius: 24px;
+      padding: 32px 28px;
+      width: 92%;
+      max-width: 380px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .gatekeeper-card.shake {
+      animation: pin-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes pin-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    .gatekeeper-icon {
+      font-size: 44px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.5));
+    }
+
+    .gatekeeper-title {
+      font-family: 'Cinzel', serif;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+
+    .gatekeeper-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    .pin-display-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .pin-digit-box {
+      width: 52px;
+      height: 56px;
+      border-radius: 12px;
+      background: rgba(3, 7, 18, 0.75);
+      border: 2px solid rgba(0, 245, 212, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: #00f5d4;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s ease;
+    }
+
+    .pin-digit-box.filled {
+      border-color: #00f5d4;
+      box-shadow: 0 0 12px rgba(0, 245, 212, 0.4);
+      background: rgba(0, 245, 212, 0.12);
+    }
+
+    .pin-digit-box.error {
+      border-color: #ef4444;
+      color: #ef4444;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pin-key {
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-key:hover {
+      background: rgba(0, 245, 212, 0.2);
+      border-color: #00f5d4;
+      color: #fff;
+    }
+
+    .pin-key:active {
+      transform: scale(0.95);
+    }
+
+    .pin-key.pin-action {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .pin-key.pin-action:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #ef4444;
+      color: #fff;
+    }
+
+    .pin-key.pin-enter {
+      background: rgba(0, 245, 212, 0.18);
+      border-color: rgba(0, 245, 212, 0.4);
+      color: #00f5d4;
+    }
+
+    .pin-key.pin-enter:hover {
+      background: rgba(0, 245, 212, 0.3);
+      border-color: #00f5d4;
+      color: #fff;
+    }
+
+    .pin-remember-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #94a3b8;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+
+    .pin-remember-label input {
+      accent-color: #00f5d4;
+      cursor: pointer;
+    }
+
+    .pin-feedback {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #64748b;
+      min-height: 20px;
+      margin-bottom: 14px;
+    }
+
+    .pin-feedback.error {
+      color: #f87171;
+    }
+
+    .pin-feedback.success {
+      color: #34d399;
+    }
+
+    .btn-unlock {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 245, 212, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%);
+      border: 1px solid var(--cyan);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-unlock:hover {
+      background: linear-gradient(135deg, rgba(0, 245, 212, 0.4) 0%, rgba(56, 189, 248, 0.4) 100%);
+      box-shadow: 0 0 16px rgba(0, 245, 212, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-lock-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #94a3b8;
+      font-size: 12px;
+      padding: 5px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-lock-nav:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Passcode Gatekeeper Lock Screen -->
+  <div id="gatekeeper-modal" class="gatekeeper-backdrop">
+    <div class="gatekeeper-card" id="gatekeeper-card">
+      <div class="gatekeeper-icon">🌅</div>
+      <h1 class="gatekeeper-title">HORIZON VR STUDIO</h1>
+      <p class="gatekeeper-subtitle">Restricted Private Space • Passcode Required</p>
+
+      <div class="pin-display-container">
+        <div class="pin-digit-box" id="digit-0"></div>
+        <div class="pin-digit-box" id="digit-1"></div>
+        <div class="pin-digit-box" id="digit-2"></div>
+        <div class="pin-digit-box" id="digit-3"></div>
+      </div>
+      <input type="password" id="pin-hidden-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" style="position: absolute; opacity: 0; pointer-events: none;">
+
+      <!-- VR Laser / Touch Friendly Keypad -->
+      <div class="pin-keypad">
+        <button class="pin-key" data-key="1">1</button>
+        <button class="pin-key" data-key="2">2</button>
+        <button class="pin-key" data-key="3">3</button>
+        <button class="pin-key" data-key="4">4</button>
+        <button class="pin-key" data-key="5">5</button>
+        <button class="pin-key" data-key="6">6</button>
+        <button class="pin-key" data-key="7">7</button>
+        <button class="pin-key" data-key="8">8</button>
+        <button class="pin-key" data-key="9">9</button>
+        <button class="pin-key pin-action" data-key="back">⌫</button>
+        <button class="pin-key" data-key="0">0</button>
+        <button class="pin-key pin-enter" data-key="enter">↵</button>
+      </div>
+
+      <label class="pin-remember-label">
+        <input type="checkbox" id="pin-remember" checked>
+        <span>Remember passcode on this device / headset</span>
+      </label>
+
+      <div class="pin-feedback" id="pin-feedback">Enter 4-digit PIN to connect to workstation</div>
+
+      <button id="btn-unlock-studio" class="btn-unlock">Unlock Studio & Enter VR</button>
+    </div>
+  </div>
 
   <!-- Top Navigation Header -->
   <header class="top-header">
@@ -181,9 +452,14 @@
         VR STUDIO SANDBOX <span>ARTIFACT 35</span>
       </div>
     </div>
-    <div class="telemetry-pill">
-      <span class="dot-live"></span>
-      <span id="header-status">Studio Live • Large Terminal Slate</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="btn-lock-nav" id="btn-lock-studio" title="Lock studio and require passcode">
+        <span>🔒</span> Lock Studio
+      </button>
+      <div class="telemetry-pill">
+        <span class="dot-live"></span>
+        <span id="header-status">Studio Live • Large Terminal Slate</span>
+      </div>
     </div>
   </header>
 
@@ -659,7 +935,8 @@
     // DYNAMIC STUDIO CONTROLLER: Large Slate, AI Art & 3D Inserter
     // =============================================================
     class StudioManager {
-      constructor() {
+      constructor(authPin) {
+        this.authPin = authPin || '';
         this.wallCanvasEl = document.querySelector('#studio-wall-canvas');
         this.canvasPlaqueTitle = document.querySelector('#canvas-plaque-title');
         this.modelSlotEl = document.querySelector('#model-inserter-slot');
@@ -708,6 +985,10 @@
       }
 
       initSupabaseRelay() {
+        if (this.authPin !== '0214') {
+          console.warn('Cannot initialize Supabase relay without valid PIN.');
+          return;
+        }
         try {
           if (typeof supabase !== 'undefined') {
             const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
@@ -926,6 +1207,7 @@
                 event: 'avatar_query',
                 payload: {
                   queryId: queryId,
+                  authPin: this.authPin,
                   audioBase64: base64Data,
                   mimeType: mimeType,
                   room: 'VR Studio Sandbox',
@@ -941,6 +1223,7 @@
                   event: 'avatar_query_chunk',
                   payload: {
                     queryId: queryId,
+                    authPin: this.authPin,
                     chunkIndex: i,
                     totalChunks: totalChunks,
                     chunkData: chunk,
@@ -999,16 +1282,168 @@
       }
     }
 
-    // Initialize when A-Frame scene is loaded
-    window.addEventListener('DOMContentLoaded', () => {
-      const scene = document.querySelector('a-scene');
-      if (scene.hasLoaded) {
-        window.studioMgr = new StudioManager();
+    // =============================================================
+    // PASSCODE GATEKEEPER CONTROLLER (PIN: 0214)
+    // =============================================================
+    const CORRECT_PIN = '0214';
+    let currentPinInput = '';
+
+    function updatePinDisplay() {
+      for (let i = 0; i < 4; i++) {
+        const box = document.getElementById(`digit-${i}`);
+        if (!box) continue;
+        if (i < currentPinInput.length) {
+          box.textContent = '•';
+          box.classList.add('filled');
+          box.classList.remove('error');
+        } else {
+          box.textContent = '';
+          box.classList.remove('filled', 'error');
+        }
+      }
+    }
+
+    function setPinFeedback(msg, type = 'normal') {
+      const fb = document.getElementById('pin-feedback');
+      if (!fb) return;
+      fb.textContent = msg;
+      fb.className = `pin-feedback ${type}`;
+    }
+
+    function shakePinBoxes() {
+      const card = document.getElementById('gatekeeper-card');
+      for (let i = 0; i < 4; i++) {
+        const box = document.getElementById(`digit-${i}`);
+        if (box) box.classList.add('error');
+      }
+      if (card) {
+        card.classList.add('shake');
+        setTimeout(() => card.classList.remove('shake'), 500);
+      }
+    }
+
+    function attemptUnlock(pinToTest) {
+      if (pinToTest === CORRECT_PIN) {
+        setPinFeedback('✅ Passcode verified! Unlocking studio...', 'success');
+        const remember = document.getElementById('pin-remember')?.checked;
+        if (remember) {
+          try { localStorage.setItem('horizon_vr_studio_pin', CORRECT_PIN); } catch (e) {}
+        }
+        setTimeout(() => {
+          const modal = document.getElementById('gatekeeper-modal');
+          if (modal) modal.classList.add('unlocked');
+          bootStudio(CORRECT_PIN);
+        }, 400);
+        return true;
       } else {
+        shakePinBoxes();
+        setPinFeedback('❌ Incorrect Passcode. Access Denied.', 'error');
+        setTimeout(() => {
+          currentPinInput = '';
+          updatePinDisplay();
+          setPinFeedback('Enter 4-digit PIN to connect to workstation', 'normal');
+        }, 900);
+        return false;
+      }
+    }
+
+    function handleKeyClick(key) {
+      if (key === 'back') {
+        if (currentPinInput.length > 0) {
+          currentPinInput = currentPinInput.slice(0, -1);
+          updatePinDisplay();
+        }
+      } else if (key === 'enter') {
+        if (currentPinInput.length === 4) {
+          attemptUnlock(currentPinInput);
+        } else {
+          setPinFeedback('Please enter all 4 digits', 'error');
+        }
+      } else if (/^[0-9]$/.test(key)) {
+        if (currentPinInput.length < 4) {
+          currentPinInput += key;
+          updatePinDisplay();
+          if (currentPinInput.length === 4) {
+            setTimeout(() => attemptUnlock(currentPinInput), 180);
+          }
+        }
+      }
+    }
+
+    function bootStudio(pin) {
+      if (window.studioMgr) return;
+      console.log('🔓 Passcode verified. Booting StudioManager...');
+      const scene = document.querySelector('a-scene');
+      if (scene && scene.hasLoaded) {
+        window.studioMgr = new StudioManager(pin);
+      } else if (scene) {
         scene.addEventListener('loaded', () => {
-          window.studioMgr = new StudioManager();
+          window.studioMgr = new StudioManager(pin);
         });
       }
+    }
+
+    function lockStudio() {
+      try {
+        localStorage.removeItem('horizon_vr_studio_pin');
+      } catch (e) {}
+      window.location.href = window.location.pathname;
+    }
+
+    // Initialize Gatekeeper on DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlPin = urlParams.get('pin') || urlParams.get('auth');
+      let savedPin = null;
+      try { savedPin = localStorage.getItem('horizon_vr_studio_pin'); } catch (e) {}
+
+      if (urlPin === CORRECT_PIN || savedPin === CORRECT_PIN) {
+        console.log('🔑 Auto-authenticated via saved PIN / URL token.');
+        const modal = document.getElementById('gatekeeper-modal');
+        if (modal) modal.classList.add('unlocked');
+        bootStudio(CORRECT_PIN);
+      } else {
+        console.log('🔒 Studio locked. Standing by for passcode entry.');
+      }
+
+      // Keypad buttons
+      document.querySelectorAll('.pin-key').forEach(btn => {
+        btn.addEventListener('click', () => {
+          handleKeyClick(btn.getAttribute('data-key'));
+        });
+      });
+
+      // Unlock button
+      const unlockBtn = document.getElementById('btn-unlock-studio');
+      if (unlockBtn) {
+        unlockBtn.addEventListener('click', () => {
+          if (currentPinInput.length === 4) {
+            attemptUnlock(currentPinInput);
+          } else {
+            setPinFeedback('Please enter all 4 digits', 'error');
+          }
+        });
+      }
+
+      // Lock button in navigation header
+      const lockNavBtn = document.getElementById('btn-lock-studio');
+      if (lockNavBtn) {
+        lockNavBtn.addEventListener('click', lockStudio);
+      }
+
+      // Keyboard support
+      window.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('gatekeeper-modal');
+        if (modal && !modal.classList.contains('unlocked')) {
+          if (e.key >= '0' && e.key <= '9') {
+            handleKeyClick(e.key);
+          } else if (e.key === 'Backspace') {
+            handleKeyClick('back');
+          } else if (e.key === 'Enter') {
+            handleKeyClick('enter');
+          }
+        }
+      });
     });
   </script>
 </body>
