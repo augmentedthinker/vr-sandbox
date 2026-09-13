@@ -169,7 +169,7 @@
     }
 
     /* ============================================================= */
-    /* PASSCODE GATEKEEPER LOCK SCREEN (PIN: 0214)                   */
+    /* PASSCODE GATEKEEPER LOCK SCREEN (CHALLENGE-RESPONSE)          */
     /* ============================================================= */
     .gatekeeper-backdrop {
       position: fixed;
@@ -935,8 +935,10 @@
     // DYNAMIC STUDIO CONTROLLER: Large Slate, AI Art & 3D Inserter
     // =============================================================
     class StudioManager {
-      constructor(authPin) {
-        this.authPin = authPin || '';
+      constructor(authToken, sbClient, sbChannel) {
+        this.authToken = authToken || '';
+        this.sbClient = sbClient || null;
+        this.sbChannel = sbChannel || null;
         this.wallCanvasEl = document.querySelector('#studio-wall-canvas');
         this.canvasPlaqueTitle = document.querySelector('#canvas-plaque-title');
         this.modelSlotEl = document.querySelector('#model-inserter-slot');
@@ -985,17 +987,19 @@
       }
 
       initSupabaseRelay() {
-        if (this.authPin !== '0214') {
-          console.warn('Cannot initialize Supabase relay without valid PIN.');
+        if (!this.authToken) {
+          console.warn('Cannot initialize Supabase relay without session token.');
           return;
         }
         try {
-          if (typeof supabase !== 'undefined') {
+          if (!this.sbClient && typeof supabase !== 'undefined') {
             const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
             this.sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             this.sbChannel = this.sbClient.channel('haven_manor_hearth');
+          }
 
+          if (this.sbChannel) {
             this.sbChannel.on('broadcast', { event: 'avatar_response' }, ({ payload }) => {
               console.log('⚡ Received AI response from relay:', payload);
               this.handleServerResponse(payload);
@@ -1207,7 +1211,7 @@
                 event: 'avatar_query',
                 payload: {
                   queryId: queryId,
-                  authPin: this.authPin,
+                  authToken: this.authToken,
                   audioBase64: base64Data,
                   mimeType: mimeType,
                   room: 'VR Studio Sandbox',
@@ -1223,7 +1227,7 @@
                   event: 'avatar_query_chunk',
                   payload: {
                     queryId: queryId,
-                    authPin: this.authPin,
+                    authToken: this.authToken,
                     chunkIndex: i,
                     totalChunks: totalChunks,
                     chunkData: chunk,
@@ -1283,10 +1287,22 @@
     }
 
     // =============================================================
-    // PASSCODE GATEKEEPER CONTROLLER (PIN: 0214)
+    // PASSCODE GATEKEEPER CONTROLLER (ZERO SECRETS IN PUBLIC CODE)
     // =============================================================
-    const CORRECT_PIN = '0214';
     let currentPinInput = '';
+    let pendingAuthQueryId = null;
+    let authTimeoutTimer = null;
+    let sharedSbClient = null;
+    let sharedSbChannel = null;
+
+    function getOrCreateClientId() {
+      let id = localStorage.getItem('horizon_vr_client_id');
+      if (!id) {
+        id = 'cid_' + Math.random().toString(36).substring(2, 11);
+        try { localStorage.setItem('horizon_vr_client_id', id); } catch (e) {}
+      }
+      return id;
+    }
 
     function updatePinDisplay() {
       for (let i = 0; i < 4; i++) {
@@ -1322,29 +1338,76 @@
       }
     }
 
-    function attemptUnlock(pinToTest) {
-      if (pinToTest === CORRECT_PIN) {
-        setPinFeedback('✅ Passcode verified! Unlocking studio...', 'success');
-        const remember = document.getElementById('pin-remember')?.checked;
-        if (remember) {
-          try { localStorage.setItem('horizon_vr_studio_pin', CORRECT_PIN); } catch (e) {}
-        }
-        setTimeout(() => {
-          const modal = document.getElementById('gatekeeper-modal');
-          if (modal) modal.classList.add('unlocked');
-          bootStudio(CORRECT_PIN);
-        }, 400);
-        return true;
-      } else {
-        shakePinBoxes();
-        setPinFeedback('❌ Incorrect Passcode. Access Denied.', 'error');
-        setTimeout(() => {
-          currentPinInput = '';
-          updatePinDisplay();
-          setPinFeedback('Enter 4-digit PIN to connect to workstation', 'normal');
-        }, 900);
-        return false;
+    function initAuthChannel() {
+      if (!sharedSbClient && typeof supabase !== 'undefined') {
+        const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
+        sharedSbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        sharedSbChannel = sharedSbClient.channel('haven_manor_hearth');
+
+        sharedSbChannel.on('broadcast', { event: 'auth_result' }, ({ payload }) => {
+          if (payload && payload.queryId === pendingAuthQueryId) {
+            clearTimeout(authTimeoutTimer);
+            pendingAuthQueryId = null;
+            if (payload.success && payload.token) {
+              handleAuthSuccess(payload.token);
+            } else {
+              handleAuthFailure(payload.message || 'Incorrect Passcode. Access Denied.');
+            }
+          }
+        });
+
+        sharedSbChannel.subscribe();
       }
+    }
+
+    function verifyWithWorkstation(pinOrToken) {
+      if (!sharedSbChannel) initAuthChannel();
+      setPinFeedback('⏳ Verifying with workstation...', 'normal');
+      pendingAuthQueryId = 'auth_' + Date.now();
+
+      clearTimeout(authTimeoutTimer);
+      authTimeoutTimer = setTimeout(() => {
+        if (pendingAuthQueryId) {
+          pendingAuthQueryId = null;
+          setPinFeedback('⚠️ Workstation relay not responding. Is Chromebook awake?', 'error');
+          shakePinBoxes();
+        }
+      }, 6000);
+
+      sharedSbChannel.send({
+        type: 'broadcast',
+        event: 'auth_verify',
+        payload: {
+          queryId: pendingAuthQueryId,
+          pinOrToken: pinOrToken,
+          clientId: getOrCreateClientId(),
+          timestamp: Date.now()
+        }
+      });
+    }
+
+    function handleAuthSuccess(sessionToken) {
+      setPinFeedback('✅ Passcode verified! Unlocking studio...', 'success');
+      const remember = document.getElementById('pin-remember')?.checked;
+      if (remember) {
+        try { localStorage.setItem('horizon_vr_studio_token', sessionToken); } catch (e) {}
+      }
+      setTimeout(() => {
+        const modal = document.getElementById('gatekeeper-modal');
+        if (modal) modal.classList.add('unlocked');
+        bootStudio(sessionToken);
+      }, 400);
+    }
+
+    function handleAuthFailure(errMsg) {
+      shakePinBoxes();
+      setPinFeedback(`❌ ${errMsg}`, 'error');
+      setTimeout(() => {
+        currentPinInput = '';
+        updatePinDisplay();
+        setPinFeedback('Enter 4-digit PIN to connect to workstation', 'normal');
+      }, 1000);
     }
 
     function handleKeyClick(key) {
@@ -1355,7 +1418,7 @@
         }
       } else if (key === 'enter') {
         if (currentPinInput.length === 4) {
-          attemptUnlock(currentPinInput);
+          verifyWithWorkstation(currentPinInput);
         } else {
           setPinFeedback('Please enter all 4 digits', 'error');
         }
@@ -1364,44 +1427,44 @@
           currentPinInput += key;
           updatePinDisplay();
           if (currentPinInput.length === 4) {
-            setTimeout(() => attemptUnlock(currentPinInput), 180);
+            setTimeout(() => verifyWithWorkstation(currentPinInput), 180);
           }
         }
       }
     }
 
-    function bootStudio(pin) {
+    function bootStudio(sessionToken) {
       if (window.studioMgr) return;
-      console.log('🔓 Passcode verified. Booting StudioManager...');
+      console.log('🔓 Workstation authorized. Booting StudioManager...');
       const scene = document.querySelector('a-scene');
       if (scene && scene.hasLoaded) {
-        window.studioMgr = new StudioManager(pin);
+        window.studioMgr = new StudioManager(sessionToken, sharedSbClient, sharedSbChannel);
       } else if (scene) {
         scene.addEventListener('loaded', () => {
-          window.studioMgr = new StudioManager(pin);
+          window.studioMgr = new StudioManager(sessionToken, sharedSbClient, sharedSbChannel);
         });
       }
     }
 
     function lockStudio() {
       try {
-        localStorage.removeItem('horizon_vr_studio_pin');
+        localStorage.removeItem('horizon_vr_studio_token');
       } catch (e) {}
       window.location.href = window.location.pathname;
     }
 
     // Initialize Gatekeeper on DOMContentLoaded
     window.addEventListener('DOMContentLoaded', () => {
+      initAuthChannel();
+
       const urlParams = new URLSearchParams(window.location.search);
       const urlPin = urlParams.get('pin') || urlParams.get('auth');
-      let savedPin = null;
-      try { savedPin = localStorage.getItem('horizon_vr_studio_pin'); } catch (e) {}
+      let savedToken = null;
+      try { savedToken = localStorage.getItem('horizon_vr_studio_token'); } catch (e) {}
 
-      if (urlPin === CORRECT_PIN || savedPin === CORRECT_PIN) {
-        console.log('🔑 Auto-authenticated via saved PIN / URL token.');
-        const modal = document.getElementById('gatekeeper-modal');
-        if (modal) modal.classList.add('unlocked');
-        bootStudio(CORRECT_PIN);
+      if (urlPin || savedToken) {
+        console.log('🔑 Auto-authenticating via saved token or URL parameter...');
+        verifyWithWorkstation(urlPin || savedToken);
       } else {
         console.log('🔒 Studio locked. Standing by for passcode entry.');
       }
@@ -1418,7 +1481,7 @@
       if (unlockBtn) {
         unlockBtn.addEventListener('click', () => {
           if (currentPinInput.length === 4) {
-            attemptUnlock(currentPinInput);
+            verifyWithWorkstation(currentPinInput);
           } else {
             setPinFeedback('Please enter all 4 digits', 'error');
           }
