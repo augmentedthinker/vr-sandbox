@@ -409,15 +409,27 @@
           font="kelsonsans">
         </a-text>
 
-        <!-- Status Indicator Pill -->
-        <a-plane position="0 0.49 0.02" width="1.0" height="0.07" material="color: #032e2b; opacity: 0.95"></a-plane>
+        <!-- Status Indicator Pill & Live Ticking Timer -->
+        <a-plane position="-0.22 0.49 0.02" width="1.15" height="0.07" material="color: #032e2b; opacity: 0.95"></a-plane>
         <a-text
           id="hud-status-text"
           value="🟢 ONLINE • READY FOR VOICE COMMANDS"
           align="center"
-          position="0 0.49 0.025"
+          position="-0.22 0.49 0.025"
           width="1.3"
           color="#34d399"
+          font="kelsonsans">
+        </a-text>
+
+        <!-- Live Elapsed Timer Pill -->
+        <a-plane position="0.60 0.49 0.02" width="0.44" height="0.07" material="color: #0b1e33; opacity: 0.95"></a-plane>
+        <a-text
+          id="hud-timer-text"
+          value="⏱️ 00:00"
+          align="center"
+          position="0.60 0.49 0.025"
+          width="1.2"
+          color="#38bdf8"
           font="kelsonsans">
         </a-text>
 
@@ -654,6 +666,7 @@
         
         // In-VR HUD elements (Large Slate)
         this.hudStatus = document.querySelector('#hud-status-text');
+        this.hudTimer = document.querySelector('#hud-timer-text');
         this.hudUserQuery = document.querySelector('#hud-user-query');
         this.hudAiReply = document.querySelector('#hud-ai-reply');
         this.micBtn = document.querySelector('#hud-mic-btn');
@@ -664,12 +677,33 @@
         this.audioChunks = [];
         this.micStream = null;
         this.loader = new THREE.TextureLoader();
+        this.timerInterval = null;
+        this.timerStartTime = null;
 
         // Initialize Supabase Realtime Relay
         this.initSupabaseRelay();
 
         // Initialize Audio Recording
         this.initVoiceButton();
+      }
+
+      startTimer() {
+        this.stopTimer();
+        this.timerStartTime = Date.now();
+        if (this.hudTimer) this.hudTimer.setAttribute('value', '⏱️ 00:00');
+        this.timerInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - this.timerStartTime) / 1000);
+          const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+          const ss = String(elapsed % 60).padStart(2, '0');
+          if (this.hudTimer) this.hudTimer.setAttribute('value', `⏱️ ${mm}:${ss}`);
+        }, 1000);
+      }
+
+      stopTimer() {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
       }
 
       initSupabaseRelay() {
@@ -859,14 +893,16 @@
         if (this.mediaRecorder && this.isRecording) {
           this.isRecording = false;
           this.mediaRecorder.stop();
+          this.startTimer();
           this.micBtn.setAttribute('material', 'color', '#d97706'); // Amber
-          this.micLabel.setAttribute('value', '⏳ SENDING TO ANTIGRAVITY...');
+          this.micLabel.setAttribute('value', '⏳ WAITING FOR ANTIGRAVITY...');
           this.setStatus('⏳ TRANSMITTING AUDIO TO AI RELAY...');
         }
       }
 
       resetMicUI() {
         this.isRecording = false;
+        this.stopTimer();
         if (this.micBtn) this.micBtn.setAttribute('material', 'color', '#0284c7'); // Blue
         if (this.micLabel) this.micLabel.setAttribute('value', '🎙️ CLICK TO SPEAK (RECORD VOICE)');
         this.setStatus('🟢 ONLINE • READY FOR VOICE COMMANDS');
@@ -885,9 +921,9 @@
           console.log(`📡 Sending audio (${base64Data.length} chars) to AI Relay...`);
 
           this.pendingTimeout = setTimeout(() => {
-            this.setDialogue("[Audio Sent]", "AI Relay took longer than 40s. The studio remains ready for your next thought.");
+            this.setDialogue("[Timeout]", "Antigravity took longer than 180s to compute. The studio remains active for your next thought.");
             this.resetMicUI();
-          }, 40000);
+          }, 180000);
 
           if (this.sbChannel) {
             await this.sbChannel.send({
@@ -910,6 +946,7 @@
       // 5. Handle AI Response (Parse Actions & Render Clean Text)
       // -----------------------------------------------------------
       handleServerResponse(payload) {
+        this.stopTimer();
         if (this.pendingTimeout) {
           clearTimeout(this.pendingTimeout);
           this.pendingTimeout = null;
