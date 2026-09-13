@@ -379,109 +379,110 @@
     <!-- ============================================================= -->
     <a-entity id="vr-terminal-rig" position="-2.6 0 -0.2" rotation="0 52 0">
       <!-- Twin Steel Stand Columns -->
-      <a-cylinder position="-0.5 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
-      <a-cylinder position="0.5 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
-      <a-box position="0 0.02 0" width="1.4" height="0.04" depth="0.4" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-box>
+      <a-cylinder position="-0.7 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-cylinder position="0.7 0.6 0" radius="0.03" height="1.2" material="color: #1e293b; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-box position="0 0.02 0" width="1.8" height="0.04" depth="0.4" material="color: #0f172a; metalness: 0.8; roughness: 0.2"></a-box>
 
-      <!-- Large Holographic Glass Panel Assembly -->
+      <!-- Large Holographic Glass Panel Assembly (2.1m Wide x 1.6m Tall) -->
       <a-entity position="0 1.45 0" rotation="-10 0 0">
-        <!-- Main Glass Board (1.85m Wide x 1.35m Tall) -->
+        <!-- Main Glass Board -->
         <a-plane
-          width="1.85"
-          height="1.35"
+          width="2.1"
+          height="1.6"
           material="color: #040711; opacity: 0.96; transparent: true; roughness: 0.2; metalness: 0.3"
           class="clickable">
         </a-plane>
 
         <!-- Luminous Cyan Accent Borders -->
-        <a-box position="0 0.665 0.01" width="1.85" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
-        <a-box position="0 -0.665 0.01" width="1.85" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
-        <a-box position="-0.92 0 0.01" width="0.015" height="1.33" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
-        <a-box position="0.92 0 0.01" width="0.015" height="1.33" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="0 0.79 0.01" width="2.1" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="0 -0.79 0.01" width="2.1" height="0.015" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="-1.04 0 0.01" width="0.015" height="1.58" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
+        <a-box position="1.04 0 0.01" width="0.015" height="1.58" depth="0.02" material="color: #00f5d4; shader: flat; opacity: 0.7"></a-box>
 
         <!-- Top Header Banner -->
         <a-text
           value="HORIZON VR STUDIO • ANTIGRAVITY"
           align="center"
-          position="0 0.58 0.02"
-          width="2.2"
+          position="0 0.70 0.02"
+          width="2.4"
           color="#00f5d4"
           font="kelsonsans">
         </a-text>
 
         <!-- Status Indicator Pill & Live Ticking Timer -->
-        <a-plane position="-0.22 0.49 0.02" width="1.15" height="0.07" material="color: #032e2b; opacity: 0.95"></a-plane>
+        <a-plane position="-0.28 0.60 0.02" width="1.30" height="0.075" material="color: #032e2b; opacity: 0.95"></a-plane>
         <a-text
           id="hud-status-text"
           value="🟢 ONLINE • READY FOR VOICE COMMANDS"
           align="center"
-          position="-0.22 0.49 0.025"
-          width="1.3"
+          position="-0.28 0.60 0.025"
+          width="1.35"
           color="#34d399"
           font="kelsonsans">
         </a-text>
 
         <!-- Live Elapsed Timer Pill -->
-        <a-plane position="0.60 0.49 0.02" width="0.44" height="0.07" material="color: #0b1e33; opacity: 0.95"></a-plane>
+        <a-plane position="0.68 0.60 0.02" width="0.48" height="0.075" material="color: #0b1e33; opacity: 0.95"></a-plane>
         <a-text
           id="hud-timer-text"
           value="⏱️ 00:00"
           align="center"
-          position="0.60 0.49 0.025"
-          width="1.2"
+          position="0.68 0.60 0.025"
+          width="1.25"
           color="#38bdf8"
           font="kelsonsans">
         </a-text>
 
-        <!-- SUBSTANTIAL DIALOGUE SLATE (1.68m x 0.72m) -->
-        <a-plane position="0 0.07 0.02" width="1.68" height="0.70" material="color: #080e1a; opacity: 0.92"></a-plane>
-        
-        <!-- User Query Section (Top Half) -->
+        <!-- USER VOICE QUERY SECTION (Card 1: 1.94m x 0.28m) -->
+        <a-plane position="0 0.38 0.02" width="1.94" height="0.28" material="color: #070e1c; opacity: 0.94"></a-plane>
         <a-text
-          value="CHRISTOPHER:"
-          position="-0.78 0.35 0.025"
-          width="1.3"
-          color="#94a3b8"
+          value="CHRISTOPHER (VOICE):"
+          position="-0.92 0.48 0.025"
+          width="1.5"
+          color="#00f5d4"
           font="kelsonsans">
         </a-text>
         <a-text
           id="hud-user-query"
-          value="Push the button below, speak naturally into your Quest 2 mic, and click again to send."
-          position="-0.78 0.24 0.025"
-          width="1.56"
-          wrap-count="48"
+          anchor="left"
+          baseline="top"
+          position="-0.92 0.42 0.025"
+          width="1.84"
+          wrap-count="56"
           color="#f8fafc"
-          font="kelsonsans">
+          font="kelsonsans"
+          value="Push the button below, speak naturally into your Quest 2 mic, and click again to send.">
         </a-text>
 
-        <a-line start="-0.78 0.12 0.025" end="0.78 0.12 0.025" color="#1e293b"></a-line>
-
-        <!-- Antigravity Response Section (Bottom Half — Multi-Paragraph Capacity!) -->
+        <!-- ANTIGRAVITY RESPONSE SECTION (Card 2: 1.94m x 0.48m — Zero Overlap!) -->
+        <a-plane position="0 -0.06 0.02" width="1.94" height="0.48" material="color: #040914; opacity: 0.96"></a-plane>
         <a-text
-          value="ANTIGRAVITY:"
-          position="-0.78 0.06 0.025"
-          width="1.3"
+          value="ANTIGRAVITY (CLI):"
+          position="-0.92 0.14 0.025"
+          width="1.5"
           color="#38bdf8"
           font="kelsonsans">
         </a-text>
         <a-text
           id="hud-ai-reply"
-          value="Standing by in the studio. You can ask me to paint anything on the wall canvas (e.g. 'generate a cat', 'paint a cosmic dawn'), or insert 3D models onto the center table."
-          position="-0.78 -0.08 0.025"
-          width="1.56"
-          wrap-count="48"
-          color="#38bdf8"
-          font="kelsonsans">
+          anchor="left"
+          baseline="top"
+          position="-0.92 0.08 0.025"
+          width="1.84"
+          wrap-count="56"
+          color="#93c5fd"
+          font="kelsonsans"
+          value="Standing by in the studio. You can ask me to paint anything on the wall canvas, or compile custom 3D models onto the center table.">
         </a-text>
 
         <!-- ========================================================= -->
         <!-- PUSH-TO-TALK BUTTON (Extra-Large Tactile Target)         -->
         <!-- ========================================================= -->
-        <a-entity id="hud-mic-button-group" position="0 -0.46 0.03">
+        <a-entity id="hud-mic-button-group" position="0 -0.56 0.03">
           <a-plane
             id="hud-mic-btn"
             class="clickable"
-            width="1.45"
+            width="1.80"
             height="0.18"
             material="color: #0284c7; roughness: 0.3; metalness: 0.3">
           </a-plane>
@@ -490,7 +491,7 @@
             value="🎙️ CLICK TO SPEAK (RECORD VOICE)"
             align="center"
             position="0 0 0.01"
-            width="1.65"
+            width="2.0"
             color="#ffffff"
             font="kelsonsans">
           </a-text>
@@ -746,7 +747,7 @@
       // -----------------------------------------------------------
       updateCanvas(textureUrl, titleText) {
         if (!this.wallCanvasEl) return;
-        this.setStatus(`🎨 Synthesizing Wall Canvas: ${titleText}...`);
+        this.setStatus(`🎨 Updating Wall Canvas: ${titleText}...`);
 
         if (this.canvasPlaqueTitle) {
           this.canvasPlaqueTitle.setAttribute('value', `${titleText} • Canvas Live`);
@@ -761,18 +762,8 @@
           }
           this.setStatus('🟢 ONLINE • CANVAS UPDATED');
         }, undefined, (err) => {
-          console.warn('Canvas texture load error, generating live AI fallback:', err);
-          // If local URL 404s (e.g. cat request), generate dynamic image via live AI synthesis API!
-          const aiGenUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(titleText)}?width=1280&height=768&nologo=true`;
-          this.loader.load(aiGenUrl, (genTex) => {
-            const mesh = this.wallCanvasEl.getObject3D('mesh');
-            if (mesh && mesh.material) {
-              genTex.colorSpace = THREE.SRGBColorSpace;
-              mesh.material.map = genTex;
-              mesh.material.needsUpdate = true;
-            }
-            this.setStatus('🟢 ONLINE • FRESH AI IMAGE GENERATED');
-          });
+          console.warn('Canvas texture load error:', err);
+          this.setStatus('⚠️ CANVAS TEXTURE LOAD ERROR');
         });
       }
 
@@ -925,18 +916,42 @@
             this.resetMicUI();
           }, 180000);
 
+          const CHUNK_SIZE = 55000;
+          const totalChunks = Math.ceil(base64Data.length / CHUNK_SIZE);
+
           if (this.sbChannel) {
-            await this.sbChannel.send({
-              type: 'broadcast',
-              event: 'avatar_query',
-              payload: {
-                queryId: queryId,
-                audioBase64: base64Data,
-                mimeType: mimeType,
-                room: 'VR Studio Sandbox',
-                timestamp: Date.now()
+            if (totalChunks === 1) {
+              await this.sbChannel.send({
+                type: 'broadcast',
+                event: 'avatar_query',
+                payload: {
+                  queryId: queryId,
+                  audioBase64: base64Data,
+                  mimeType: mimeType,
+                  room: 'VR Studio Sandbox',
+                  timestamp: Date.now()
+                }
+              });
+            } else {
+              console.log(`📦 Large audio recording (${base64Data.length} chars). Streaming ${totalChunks} chunks...`);
+              for (let i = 0; i < totalChunks; i++) {
+                const chunk = base64Data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                await this.sbChannel.send({
+                  type: 'broadcast',
+                  event: 'avatar_query_chunk',
+                  payload: {
+                    queryId: queryId,
+                    chunkIndex: i,
+                    totalChunks: totalChunks,
+                    chunkData: chunk,
+                    mimeType: mimeType,
+                    room: 'VR Studio Sandbox',
+                    timestamp: Date.now()
+                  }
+                });
+                await new Promise(r => setTimeout(r, 20));
               }
-            });
+            }
           }
         };
         reader.readAsDataURL(blob);
@@ -958,14 +973,8 @@
         // Parse any action tags: [ACTION: canvas, url: "...", title: "..."]
         const canvasMatch = rawText.match(/\[ACTION:\s*canvas,\s*url:\s*["']([^"']+)["'],\s*title:\s*["']([^"']+)["']\]/i);
         if (canvasMatch) {
-          let cUrl = canvasMatch[1];
-          let cTitle = canvasMatch[2];
-
-          // If the AI requested a generic or freshly generated prompt (e.g. cat, dragon, etc.),
-          // synthesize it live using the AI image generation pipeline!
-          if (cUrl.includes('generated_') || !cUrl.startsWith('./textures/canvas_')) {
-            cUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cTitle)}?width=1280&height=768&nologo=true`;
-          }
+          const cUrl = canvasMatch[1];
+          const cTitle = canvasMatch[2];
           this.updateCanvas(cUrl, cTitle);
         }
 
