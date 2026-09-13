@@ -685,6 +685,16 @@
               this.handleServerResponse(payload);
             });
 
+            this.sbChannel.on('broadcast', { event: 'avatar_status' }, ({ payload }) => {
+              console.log('⚡ Received status update from relay:', payload);
+              if (payload?.prompt && this.hudUserQuery) {
+                this.hudUserQuery.setAttribute('value', payload.prompt);
+              }
+              if (payload?.message) {
+                this.setStatus(payload.message);
+              }
+            });
+
             this.sbChannel.subscribe((status) => {
               console.log('Supabase Realtime status:', status);
               if (status === 'SUBSCRIBED') {
@@ -875,9 +885,9 @@
           console.log(`📡 Sending audio (${base64Data.length} chars) to AI Relay...`);
 
           this.pendingTimeout = setTimeout(() => {
-            this.setDialogue("[Audio Sent]", "AI Relay took longer than 25s. The studio remains ready for your next thought.");
+            this.setDialogue("[Audio Sent]", "AI Relay took longer than 40s. The studio remains ready for your next thought.");
             this.resetMicUI();
-          }, 25000);
+          }, 40000);
 
           if (this.sbChannel) {
             await this.sbChannel.send({
